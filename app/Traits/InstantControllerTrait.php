@@ -1,0 +1,147 @@
+<?php
+
+namespace App\Traits;
+
+use App\Utils\ErrorException;
+use App\Utils\Helper;
+use App\Utils\Permission;
+use App\Utils\Response;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
+trait InstantControllerTrait
+{
+    public function find($id)
+    {
+        try {
+            (new Permission($this->permission ?? null))->can("view");
+            $data = $this->service->find($id);
+            return Response::json(
+                $data,
+                "Data berhasil diambil dengan id: {$id}"
+            );
+        } catch (ErrorException $e) {
+            return $e->getResponse();
+        }
+    }
+
+    public function all(Request $request)
+    {
+        try {
+            (new Permission($this->permission ?? null))->can("view");
+            $data = $this->service->all(collect($request));
+            return Response::json($data, "Data berhasil diambil semua");
+        } catch (ErrorException $e) {
+            return $e->getResponse();
+        }
+    }
+
+    public function table(Request $request)
+    {
+        try {
+            (new Permission($this->permission ?? null))->can("view");
+            $data = $this->service->table(collect($request->all()));
+            return Response::json(
+                $data,
+                "Data halaman {$data->currentPage()} dari {$data->total()} berhasil diambil"
+            );
+        } catch (ErrorException $e) {
+            return $e->getResponse();
+        }
+    }
+
+    // [DEPRECATED]
+    public function query(Request $request)
+    {
+        try {
+            Helper::hasPermission($request, $this->model, "view");
+
+            if ($request->has("query_encryption")) {
+                $request = collect(
+                    json_decode(
+                        base64_decode($request->get("query_encryption"))
+                    )
+                );
+            }
+
+            return Response::generate([
+                "data" => $this->service->query(
+                    collect([
+                        "queries" => $request->get("queries"),
+                        "relations" => $request->get("relations"),
+                        "columns" => $request->get("columns"),
+                        "limit" => $request->get("limit"),
+                        "result_row_type" => $request->get("result_row_type"),
+                    ])
+                ),
+                "request" => $request->all(),
+            ]);
+        } catch (ErrorException $e) {
+            return $e->getResponse();
+        }
+    }
+
+    public function create(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            (new Permission($this->permission ?? null))->can("create");
+
+            // Make collections
+            $params = collect($request->toArray());
+
+            $data = $this->service->store($params);
+
+            // Set variable untuk response
+            $isSaved = collect($data)->isNotEmpty();
+            $modelName = Helper::getModelName($this->model);
+            $message = $isSaved
+                ? "Data {$modelName} berhasil disimpan"
+                : "Terjadi kesalahan saat menyimpan data {$modelName}";
+
+            DB::commit();
+            return Response::json($data, $message, 201);
+        } catch (ErrorException $e) {
+            DB::rollBack();
+            return $e->getResponse();
+        }
+    }
+
+    public function update(Request $request, $id)
+    {
+        DB::beginTransaction();
+        try {
+            (new Permission($this->permission ?? null))->can("update");
+            // Make collections
+            $params = collect($request->toArray())->put("id", $id);
+
+            $data = $this->service->store($params);
+
+            // Set variable untuk response
+            $isSaved = collect($data)->isNotEmpty();
+            $modelName = Helper::getModelName($this->model);
+            $message = $isSaved
+                ? "Data {$modelName} berhasil diperbaharui"
+                : "Terjadi kesalahan saat memperbaharui data {$modelName}";
+
+            DB::commit();
+            return Response::json($data, $message);
+        } catch (ErrorException $e) {
+            DB::rollBack();
+            return $e->getResponse();
+        }
+    }
+
+    public function remove(Request $request, $id = null)
+    {
+        try {
+            (new Permission($this->permission ?? null))->can("delete");
+            $removeData = $this->service->remove(
+                collect(["id" => $id ?? $request->id])
+            );
+            return Response::json($removeData, __("application.deleted"));
+        } catch (ErrorException $e) {
+            return $e->getResponse();
+        }
+    }
+}
