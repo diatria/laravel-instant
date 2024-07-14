@@ -1,0 +1,46 @@
+<?php
+namespace App\{Namespace};
+
+use App\Models\{ModelNamespace};
+use Diatria\LaravelInstant\Traits\InstantServiceTrait;
+
+class {Class} {
+    use InstantServiceTrait;
+
+    /**
+     * Class model yang digunakan
+     *
+     * @var App\Models\{ModelNamespace}
+     */
+    protected $model;
+
+    /**
+     * Path pagination
+     *
+     * @var string
+     */
+    protected $paginationPath = '/{PaginationPath}/table';
+
+    /**
+     * List kolom yang akan ditampilkan
+     *
+     * @var array
+     */
+    protected $columns = {Columns};
+
+    /**
+     * List kolom yang required ketika akan menyimpan data
+     *
+     * @var array
+     */
+    protected $columnsRequired = {Columns};
+
+    /**
+     * @param App\Models\{ModelNamespace} $model class
+     */
+    public function initModel()
+    {
+        $this->model = (new {Model}());
+        return $this;
+    }
+}

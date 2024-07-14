@@ -1,0 +1,32 @@
+{
+  "name": "diatria/laravel-instant",
+  "type": "library",
+  "description": "Library to speed up application creation",
+  "keywords": [
+    "php",
+    "laravel",
+    "instant"
+  ],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Dimas Adi Satria"
+    }
+  ],
+  "require": {
+    "php": ">=7.4",
+    "firebase/php-jwt": "^6.10"
+  },
+  "autoload": {
+    "psr-4": {
+      "Diatria\\LaravelInstant\\": "src"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Diatria\\LaravelInstant\\LaravelInstantServiceProvider"
+      ]
+    }
+  }
+}
