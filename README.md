@@ -6,7 +6,7 @@ Laravel Instant dibuat untuk mempermudah dan mempercepat pengerjaan pembuatan mo
 ## Instalasi
 
 ```bash
-git clone git@github.com:diatria/laravel-instant.git
+git clone https://github.com/diatria/laravel-instant.git
 ```
 
 **Untuk Laravel**
@@ -20,12 +20,11 @@ return [
 ];
 ```
 
-Tambahkan kode dibawan ini pada file `composer.json` di bagian `autoload`
+Tambahkan kode dibawan ini pada file `composer.json` di bagian `autoload > psr-4`
 
 ```json
 "autoload": {
   "psr-4": {
-    // ...
     "Diatria\\LaravelInstant\\": "vendor/diatria/laravel-instant/src"
   }
 },
