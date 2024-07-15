@@ -117,6 +117,78 @@ trait InstantServiceTrait
     }
 
     /**
+     * Remove data from database
+     * @param \Illuminate\Support\Collection $params
+     * - id	required    number
+     */
+    public function remove(Collection $params): void
+    {
+        try {
+            if (is_array($params->get("id"))) {
+                $this->model->destroy($params->get("id"));
+            } else {
+                $data = $this->model->find($params->get("id"));
+                if ($data) {
+                    $data->delete();
+                } else {
+                    throw new ErrorException("Data not found!", 404);
+                }
+            }
+        } catch (ErrorException $e) {
+            throw new ErrorException($e->getMessage(), $e->getErrorCode());
+        }
+    }
+
+    /**
+     * @param \Illuminate\Support\Collection $params => array, http_request
+     */
+    public function store(Collection $params)
+    {
+        try {
+            $data = [];
+            // Validator request
+            $validator = Validator::make(
+                $params->all(),
+                $this->columnsRequired
+            );
+            if ($validator->fails()) {
+                $message = $validator->errors()->first();
+                throw new ErrorException($message, 500);
+            }
+
+            // Filter field only specific by fillable model
+            $params = $params->only(["id", ...$this->model->getFillable()]);
+
+            // auto append if field contains `user_id`
+            $params = Helper::appendUserID($this->model, $params)->toArray();
+
+            $haveID = Helper::get($params, "id", null);
+            if ($haveID) {
+                // Action Update
+                $updated = $this->model->where("id", $haveID)->update($params);
+                if ($updated) {
+                    $data = $this->model->find($haveID);
+                }
+            } else {
+                // Action Create
+                $data = $this->model->create($params);
+            }
+
+            if ($this->responseFormatClass) {
+                return $this->responseFormatClass->object($data);
+            }
+
+            return $data;
+        } catch (\Exception $e) {
+            throw new ErrorException($e->getMessage(), $e->getCode());
+        } catch (ErrorException $e) {
+            throw new ErrorException($e->getMessage(), $e->getErrorCode());
+        } catch (\PDOException $e) {
+            throw new ErrorException($e->getMessage(), $e->getCode());
+        }
+    }
+
+    /**
      * $params
      * - queries            optional
      * - columns            optional
@@ -219,78 +291,6 @@ trait InstantServiceTrait
                 $pageOptions
             );
             return Helper::toArrayCollection($paginator);
-        } catch (ErrorException $e) {
-            throw new ErrorException($e->getMessage(), $e->getErrorCode());
-        }
-    }
-
-    /**
-     * @param \Illuminate\Support\Collection $params => array, http_request
-     */
-    public function store(Collection $params)
-    {
-        try {
-            $data = [];
-            // Validator request
-            $validator = Validator::make(
-                $params->all(),
-                $this->columnsRequired
-            );
-            if ($validator->fails()) {
-                $message = $validator->errors()->first();
-                throw new ErrorException($message, 500);
-            }
-
-            // Filter field only specific by fillable model
-            $params = $params->only(["id", ...$this->model->getFillable()]);
-
-            // auto append if field contains `user_id`
-            $params = Helper::appendUserID($this->model, $params)->toArray();
-
-            $haveID = Helper::get($params, "id", null);
-            if ($haveID) {
-                // Action Update
-                $updated = $this->model->where("id", $haveID)->update($params);
-                if ($updated) {
-                    $data = $this->model->find($haveID);
-                }
-            } else {
-                // Action Create
-                $data = $this->model->create($params);
-            }
-
-            if ($this->responseFormatClass) {
-                return $this->responseFormatClass->object($data);
-            }
-
-            return $data;
-        } catch (\Exception $e) {
-            throw new ErrorException($e->getMessage(), $e->getCode());
-        } catch (ErrorException $e) {
-            throw new ErrorException($e->getMessage(), $e->getErrorCode());
-        } catch (\PDOException $e) {
-            throw new ErrorException($e->getMessage(), $e->getCode());
-        }
-    }
-
-    /**
-     * Hapus data dari database
-     * @param \Illuminate\Support\Collection $params
-     * - id	required    number
-     */
-    public function remove(Collection $params): void
-    {
-        try {
-            if (is_array($params->get("id"))) {
-                $this->model->destroy($params->get("id"));
-            } else {
-                $data = $this->model->find($params->get("id"));
-                if ($data) {
-                    $data->delete();
-                } else {
-                    throw new ErrorException("Data not found!", 404);
-                }
-            }
         } catch (ErrorException $e) {
             throw new ErrorException($e->getMessage(), $e->getErrorCode());
         }
