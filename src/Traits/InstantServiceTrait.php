@@ -16,6 +16,32 @@ trait InstantServiceTrait
     protected $responseFormatClass;
 
     /**
+     * Mengambil semua data pada table
+     */
+    public function all()
+    {
+        try {
+            $query = $this->model->query();
+            if (Helper::hasUserID($this->model)) {
+                $query = $this->model->where("user_id", Helper::getUserID());
+                if (!empty($this->columns)) {
+                    $query = $query->select(["id", ...$this->columns]);
+                }
+            }
+
+            if ($this->responseFormatClass) {
+                return $this->responseFormatClass->array(
+                    $query->get()->toArray()
+                );
+            }
+
+            return $query->get();
+        } catch (ErrorException $e) {
+            throw new ErrorException($e->getMessage(), $e->getErrorCode());
+        }
+    }
+
+    /**
      * Mengambil hanya satu data terpilih
      * @param int|string $id 'id' atau 'uid'
      */
@@ -49,32 +75,6 @@ trait InstantServiceTrait
             }
 
             return $query;
-        } catch (ErrorException $e) {
-            throw new ErrorException($e->getMessage(), $e->getErrorCode());
-        }
-    }
-
-    /**
-     * Mengambil semua data pada table
-     */
-    public function all()
-    {
-        try {
-            $query = $this->model->query();
-            if (Helper::hasUserID($this->model)) {
-                $query = $this->model->where("user_id", Helper::getUserID());
-                if (!empty($this->columns)) {
-                    $query = $query->select(["id", ...$this->columns]);
-                }
-            }
-
-            if ($this->responseFormatClass) {
-                return $this->responseFormatClass->array(
-                    $query->get()->toArray()
-                );
-            }
-
-            return $query->get();
         } catch (ErrorException $e) {
             throw new ErrorException($e->getMessage(), $e->getErrorCode());
         }
