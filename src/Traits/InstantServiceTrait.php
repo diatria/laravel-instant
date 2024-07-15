@@ -16,7 +16,7 @@ trait InstantServiceTrait
     protected $responseFormatClass;
 
     /**
-     * Mengambil semua data pada table
+     * Retrieve all data
      */
     public function all()
     {
@@ -42,27 +42,35 @@ trait InstantServiceTrait
     }
 
     /**
-     * Mengambil hanya satu data terpilih
-     * @param int|string $id 'id' atau 'uid'
+     * Retrieves only one selected data
+     * @param int $id "id" column of the database
+     * @param \Illuminate\Http\Request $request parameters to create a query, permitted columns:
+     * - relations  | optional  | array
      */
-    public function find($id, Request $request = null)
+    public function find(int $id, Request $request = null)
     {
         try {
             $params = collect($request->all());
             $params->only(["relations"]);
+
+            // search for data based on the "id" field
             $params->put("queries", [
                 ["field" => "id", "value" => $id, "strict" => true],
             ]);
+
+            // displays data along with relationships
             if (isset($this->responseFormatRelations)) {
                 $params->put(
                     "relations",
                     $params->get("relations", $this->responseFormatRelations)
                 );
             }
-            $params->put("mode", "first");
+            $params->put("mode", "first"); // retrieves only one data
 
+            // create queries and retrieve data
             $query = $this->query($params);
 
+            // perform data formatting
             if ($this->responseFormatClass) {
                 $response = $this->responseFormatClass;
                 if (isset($this->responseFormatRelations)) {
@@ -123,16 +131,15 @@ trait InstantServiceTrait
 
     /**
      * Remove data from database
-     * @param \Illuminate\Support\Collection $params
-     * - id	required    number
+     * @param int|array $id
      */
-    public function remove(Collection $params): void
+    public function remove(int|array $id): void
     {
         try {
-            if (is_array($params->get("id"))) {
-                $this->model->destroy($params->get("id"));
+            if (is_array($id)) {
+                $this->model->destroy($id);
             } else {
-                $data = $this->model->find($params->get("id"));
+                $data = $this->model->find($id);
                 if ($data) {
                     $data->delete();
                 } else {

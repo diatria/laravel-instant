@@ -11,12 +11,15 @@ use Diatria\LaravelInstant\Utils\ErrorException;
 
 trait InstantControllerTrait
 {
-    public function find(Request $request, $id)
+    /**
+     * Retrieves only one selected data
+     */
+    public function find(Request $request, int $id)
     {
         try {
             (new Permission($this->permission ?? null))->can("view");
 
-            $data = $this->service->find($request, $id);
+            $data = $this->service->find($id, $request);
             return Response::json(
                 $data,
                 "Data berhasil diambil dengan id: {$id}"
@@ -145,14 +148,12 @@ trait InstantControllerTrait
         }
     }
 
-    public function remove(Request $request, $id = null)
+    public function remove(int|array $id)
     {
         DB::beginTransaction();
         try {
             (new Permission($this->permission ?? null))->can("delete");
-            $removeData = $this->service->remove(
-                collect(["id" => $id ?? $request->id])
-            );
+            $removeData = $this->service->remove($id);
             DB::commit();
             return Response::json($removeData, __("application.deleted"));
         } catch (ErrorException $e) {
