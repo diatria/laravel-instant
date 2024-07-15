@@ -35,9 +35,9 @@ Route::prefix("api")->group(function () {
 
     Route::controller(UserController::class)->group(function () {
         Route::get("users", "all");
-        Route::get("users/{id}", "find");
         Route::get("users/check-token", "check"); // Check validation token
         Route::get("users/table", "table");
+        Route::get("users/{id}", "find");
         Route::post("users", "register");
         Route::post("users/login", "login");
         Route::put("users/{id}", "update");
