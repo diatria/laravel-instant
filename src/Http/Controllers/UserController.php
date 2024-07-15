@@ -17,12 +17,6 @@ class UserController extends Controller
     use InstantControllerTrait;
 
     protected $service, $model;
-    protected $permission = [
-        "create" => "can_create_user",
-        "view" => "can_view_user",
-        "update" => "can_update_user",
-        "delete" => "can_delete_user",
-    ];
 
     public function __construct(User $model, UserService $service)
     {
@@ -49,9 +43,9 @@ class UserController extends Controller
             ]);
             return Response::json($data);
         } catch (ErrorException $e) {
-            return Response::error($e->getErrorCode(), $e->getMessage());
+            return Response::errorJson($e);
         } catch (\Exception $e) {
-            return Response::errorJson($e->getMessage(), $e->getCode());
+            return Response::errorJson($e);
         }
     }
 
@@ -73,7 +67,10 @@ class UserController extends Controller
             return Response::json($data);
         } catch (ErrorException $e) {
             DB::rollBack();
-            return $e->getResponse();
+            return Response::errorJson($e);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return Response::errorJson($e);
         }
     }
 }
