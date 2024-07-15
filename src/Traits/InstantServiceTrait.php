@@ -45,7 +45,7 @@ trait InstantServiceTrait
      * Mengambil hanya satu data terpilih
      * @param int|string $id 'id' atau 'uid'
      */
-    public function find(Request $request, $id)
+    public function find($id, Request $request = null)
     {
         try {
             $params = collect($request->all());
@@ -78,6 +78,11 @@ trait InstantServiceTrait
         } catch (ErrorException $e) {
             throw new ErrorException($e->getMessage(), $e->getErrorCode());
         }
+    }
+
+    public function getTable()
+    {
+        return $this->model->getTable();
     }
 
     /**
