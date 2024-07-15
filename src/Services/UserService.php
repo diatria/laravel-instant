@@ -66,7 +66,6 @@ class UserService
     public function login(array $params)
     {
         try {
-            $appName = strtolower(env("APP_NAME"));
             $user = $this->model->where("email", $params["email"])->first();
             $isUserAuth = Hash::check($params["password"], $user->password);
             if ($user && $isUserAuth) {
@@ -76,7 +75,7 @@ class UserService
                 ]);
 
                 setcookie(
-                    "{$appName}_token",
+                    "token_" . strtolower(env("APP_NAME")),
                     $token["token"],
                     Carbon::now()->addHours(6)->getTimestamp(),
                     "/",

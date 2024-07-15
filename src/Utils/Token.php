@@ -16,10 +16,13 @@ class Token
     {
         try {
             // Verifikasi Token
-            $decoded = JWT::decode(
-                $_COOKIE["csl_token"],
-                new Key(env("JWT_KEY"), "HS256")
-            );
+            $cookieName = "token_" . strtolower(env("APP_NAME"));
+            if (isset($_COOKIE[$cookieName])) {
+                $decoded = JWT::decode(
+                    $_COOKIE[$cookieName],
+                    new Key(env("JWT_KEY"), "HS256")
+                );
+            }
             return $decoded ? true : false;
         } catch (SignatureInvalidException $e) {
             throw new ErrorException($e->getMessage(), 4001);
