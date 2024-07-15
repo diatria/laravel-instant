@@ -9,6 +9,7 @@ use Diatria\LaravelInstant\Utils\Response;
 use Diatria\LaravelInstant\Utils\ErrorException;
 use Diatria\LaravelInstant\Traits\InstantServiceTrait;
 use Diatria\LaravelInstant\Http\Responses\UserResponse;
+use Diatria\LaravelInstant\Utils\Helper;
 
 class UserService
 {
@@ -79,7 +80,7 @@ class UserService
                     $token["token"],
                     Carbon::now()->addHours(6)->getTimestamp(),
                     "/",
-                    Helper::getHost(env("APP_URL")),
+                    Helper::getHost(),
                     false,
                     true
                 );
