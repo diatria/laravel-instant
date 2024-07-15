@@ -101,6 +101,11 @@ class Helper
         return $findDomain[0];
     }
 
+    static function getHost()
+    {
+        return $_SERVER["SERVER_NAME"];
+    }
+
     static function getIP()
     {
         if (!empty($_SERVER["HTTP_CLIENT_IP"])) {
