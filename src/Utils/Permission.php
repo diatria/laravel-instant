@@ -13,7 +13,6 @@ class Permission
 
     public function can($action)
     {
-        return true;
         $this->action = $action;
 
         $tokenInfo = Token::info();
