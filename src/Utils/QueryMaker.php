@@ -1,4 +1,5 @@
 <?php
+
 namespace Diatria\LaravelInstant\Utils;
 
 use Illuminate\Support\Collection;
@@ -215,8 +216,12 @@ class QueryMaker
             }
 
             return $query->get();
+        } catch (ErrorException $e) {
+            throw new ErrorException($e->getMessage(), $e->getCode());
         } catch (\Exception $e) {
-            return Response::error($e->getCode(), $e->getMessage());
+            throw new ErrorException($e->getMessage(), $e->getCode());
+        } catch (\PDOException $e) {
+            throw new ErrorException($e->getMessage(), $e->getCode());
         }
     }
 }

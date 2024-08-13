@@ -13,23 +13,31 @@ class Permission
 
     public function can($action)
     {
-        $this->action = $action;
+        try {
+            $this->action = $action;
 
-        $tokenInfo = Token::info();
-        $user = User::where("uuid", $tokenInfo["uuid"])
-            ->first()
-            ->append("permissions");
+            $tokenInfo = Token::info();
+            $user = User::where("uuid", $tokenInfo["uuid"])->first();
 
-        $haveAccess = in_array(
-            $this->getAction(),
-            $user->permissions->toArray()
-        );
+            if (!$user) {
+                throw new ErrorException("Unauthorized", 401);
+            }
 
-        if (!$haveAccess) {
-            throw new ErrorException("Permission denied", 403);
+            $haveAccess = in_array(
+                $this->getAction(),
+                $user->permissions->toArray()
+            );
+
+            if (!$haveAccess) {
+                throw new ErrorException("Permission denied", 403);
+            }
+
+            return $haveAccess;
+        } catch (ErrorException $e) {
+            throw new ErrorException($e->getMessage(), $e->getCode());
+        } catch (\Exception $e) {
+            throw new ErrorException($e->getMessage(), $e->getCode());
         }
-
-        return $haveAccess;
     }
     public function getAction()
     {

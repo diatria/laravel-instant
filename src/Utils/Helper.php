@@ -95,10 +95,16 @@ class Helper
 
     static function getDomain()
     {
-        $domain = $_SERVER["HTTP_ORIGIN"];
-        $domainWithousHttps = preg_replace("/^http(s)?:\/\//i", "", $domain);
-        $findDomain = explode(":", $domainWithousHttps);
-        return $findDomain[0];
+        try{
+            $domain = $_SERVER["HTTP_ORIGIN"];
+            $domainWithousHttps = preg_replace("/^http(s)?:\/\//i", "", $domain);
+            $findDomain = explode(":", $domainWithousHttps);
+            return $findDomain[0];
+        } catch (ErrorException $e) {
+            return Response::error($e->getMessage(), $e->getCode());
+        } catch (\Exception $e) {
+            return Response::error($e->getMessage(), $e->getCode());
+        }
     }
 
     static function getHost()
@@ -199,10 +205,5 @@ class Helper
     static function toArrayCollection($haystack, $flag = true): Collection
     {
         return collect(self::toArray($haystack, $flag));
-    }
-
-    static function unauthorized()
-    {
-        return Response::generate(["code" => 401]);
     }
 }
