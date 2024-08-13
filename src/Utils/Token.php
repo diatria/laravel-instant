@@ -1,4 +1,5 @@
 <?php
+
 namespace Diatria\LaravelInstant\Utils;
 
 use Carbon\Carbon;
@@ -38,7 +39,7 @@ class Token
     /**
      * Create token dan refresh token
      */
-    public static function create($payload): array
+    public static function create(array $payload): array
     {
         return [
             "token" => (new self())->createToken($payload),
@@ -81,22 +82,25 @@ class Token
         );
     }
 
+    /**
+     * Mengambil informasi token dari cookies
+     */
     public static function getToken()
     {
-        $bearer = request()->bearerToken();
-        if ($bearer) {
-            return $bearer;
-        }
-
-        if (isset($_COOKIE[env("APP_TOKEN_NAME") . "_token"])) {
-            return $_COOKIE[env("APP_TOKEN_NAME") . "_token"];
+        if (isset($_COOKIE[env("APP_TOKEN_NAME") . "_TOKEN"])) {
+            return $_COOKIE[env("APP_TOKEN_NAME") . "_TOKEN"];
+        } else {
+            throw new ErrorException("Token Not Found!", 403);
         }
     }
 
+    /**
+     * Mengambil informasi token
+     */
     public static function info()
     {
         try {
-            // Verifikasi Token
+            // Decrypt token
             $decoded = JWT::decode(
                 self::getToken(),
                 new Key(env("JWT_KEY"), "HS256")
