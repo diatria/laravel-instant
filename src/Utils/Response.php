@@ -62,12 +62,11 @@ class Response
         );
     }
 
-    public static function traceError(array $errors): string
+    public static function traceError(array $errors)
     {
         $getSpecificsTrace = collect($errors)->filter(function ($error) {
-            $haystacks = ["App\\Services\\", "App\\Http\\Controllers\\"];
             $needle = Helper::get($error, "class");
-            foreach ($haystacks as $haystack) {
+            foreach (config('app.response.read_class') as $haystack) {
                 if (str_contains($needle, $haystack)) {
                     return true;
                 }
