@@ -10,7 +10,7 @@ use Firebase\JWT\SignatureInvalidException;
 
 class HandleToken
 {
-    public function verify(string $token)
+    public function verify(string $token): array
     {
         try {
             // Verifikasi Token
