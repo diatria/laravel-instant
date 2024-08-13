@@ -12,11 +12,11 @@ class Token
     /**
      * Melakukan pengecekan / validasi JWT token
      */
-    public static function check(): bool
+    public static function check()
     {
         try {
             // Verifikasi Token
-            $cookieName = "token_" . strtolower(env("APP_NAME"));
+            $cookieName = env("APP_TOKEN_NAME") . "_TOKEN";
             if (isset($_COOKIE[$cookieName])) {
                 $decoded = JWT::decode(
                     $_COOKIE[$cookieName],
