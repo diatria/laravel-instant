@@ -116,4 +116,47 @@ class Token
             return Response::error($e->getErrorCode(), $e->getMessage());
         }
     }
+
+    /**
+     * Remove cookie / token
+     */
+    public function  revokeToken() {
+        try {
+            setcookie(
+                env("APP_TOKEN_NAME") . "_TOKEN",
+                "",
+                time() - 3600,
+                "/",
+                "localhost",
+                false,
+                true
+            );
+        } catch (\Exception $e) {
+            return Response::error($e->getMessage(), $e->getCode());
+        } catch (ErrorException $e) {
+            return Response::error($e->getMessage(), $e->getCode());
+        }
+    }
+
+    /**
+     * Melakukan set token ke cookies
+     */
+    public static function setToken(string $token)
+    {
+        try{
+            setcookie(
+                env("APP_TOKEN_NAME") . "_TOKEN",
+                $token,
+                Carbon::now()->addHours(6)->getTimestamp(),
+                "/",
+                Helper::getDomain(),
+                false,
+                true
+            );
+        } catch (ErrorException $e) {
+            return Response::error($e->getMessage(), $e->getCode());
+        } catch (\Exception $e) {
+            return Response::error($e->getMessage(), $e->getCode());
+        }
+    }
 }
