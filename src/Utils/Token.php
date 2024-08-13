@@ -23,7 +23,7 @@ class Token
                     new Key(env("JWT_KEY"), "HS256")
                 );
             }
-            return $decoded ? true : false;
+            return isset($decoded) ? $decoded : false;
         } catch (SignatureInvalidException $e) {
             throw new ErrorException($e->getMessage(), 4001);
         } catch (ExpiredException $e) {
