@@ -113,6 +113,9 @@ class MakeServiceCommand extends Command
             $stubContent
         );
 
+        // Remove double slash "\\"
+        $stubContent = str_replace('\\\\', '\\', $stubContent);
+
         return $stubContent;
     }
 
