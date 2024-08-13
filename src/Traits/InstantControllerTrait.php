@@ -14,20 +14,21 @@ trait InstantControllerTrait
     /**
      * Retrieves only one selected data
      */
-    public function find(Request $request, int $id)
+    public function find(Request $request)
     {
         try {
             (new Permission($this->permission ?? null))->can("view");
 
-            $data = $this->service->find($id, $request);
+            $data = $this->service->find($request);
             return Response::json(
                 $data,
-                "Data berhasil diambil dengan id: {$id}"
+                "Data berhasil diambil dengan id: {$request->id}"
             );
         } catch (ErrorException $e) {
-            return Response::errorJson($e);
+            return $e->getResponse();
         } catch (\Exception $e) {
-            return Response::errorJson($e);
+            return $e;
+            return Response::getResponse($e);
         }
     }
 
@@ -120,22 +121,26 @@ trait InstantControllerTrait
         }
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
         DB::beginTransaction();
         try {
             (new Permission($this->permission ?? null))->can("update");
             // Make collections
-            $params = collect($request->toArray())->put("id", $id);
+            $params = collect($request->toArray())->put("id", $request->id);
 
             $data = $this->service->store($params);
 
             // Set variable untuk response
-            $isSaved = collect($data)->isNotEmpty();
+            $saved = collect($data)->isNotEmpty();
             $modelName = Helper::getModelName($this->model);
-            $message = $isSaved
+            $message = $saved
                 ? "Data {$modelName} berhasil diperbaharui"
                 : "Terjadi kesalahan saat memperbaharui data {$modelName}";
+
+            if (!$saved) {
+                throw new ErrorException("Terjadi kesalahan saat memperbaharui data {$modelName}", 500);
+            }
 
             DB::commit();
             return Response::json($data, $message);
@@ -148,12 +153,12 @@ trait InstantControllerTrait
         }
     }
 
-    public function remove(int|array $id)
+    public function remove(Request $request)
     {
         DB::beginTransaction();
         try {
             (new Permission($this->permission ?? null))->can("delete");
-            $removeData = $this->service->remove($id);
+            $removeData = $this->service->remove($request->id);
             DB::commit();
             return Response::json($removeData, __("application.deleted"));
         } catch (ErrorException $e) {

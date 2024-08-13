@@ -5,11 +5,11 @@ namespace Diatria\LaravelInstant\Traits;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Diatria\LaravelInstant\Utils\Helper;
-use Diatria\LaravelInstant\Utils\QueryMaker;
 use Illuminate\Support\Facades\Validator;
+use Diatria\LaravelInstant\Utils\QueryMaker;
 use Diatria\LaravelInstant\Utils\GeneralConfig;
-use Diatria\LaravelInstant\Utils\ErrorException;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Diatria\LaravelInstant\Utils\ErrorException;
 
 trait InstantServiceTrait
 {
@@ -37,7 +37,11 @@ trait InstantServiceTrait
 
             return $query->get();
         } catch (ErrorException $e) {
-            throw new ErrorException($e->getMessage(), $e->getErrorCode());
+            throw new ErrorException($e->getMessage(), $e->getCode());
+        } catch (\Exception $e) {
+            throw new ErrorException($e->getMessage(), $e->getCode());
+        } catch (\PDOException $e) {
+            throw new ErrorException($e->getMessage(), $e->getCode());
         }
     }
 
@@ -47,7 +51,7 @@ trait InstantServiceTrait
      * @param \Illuminate\Http\Request $request parameters to create a query, permitted columns:
      * - relations  | optional  | array
      */
-    public function find(int $id, Request $request = null)
+    public function find(Request $request)
     {
         try {
             $params = collect($request->all());
@@ -55,7 +59,7 @@ trait InstantServiceTrait
 
             // search for data based on the "id" field
             $params->put("queries", [
-                ["field" => "id", "value" => $id, "strict" => true],
+                ["field" => "id", "value" => $request->id, "strict" => true],
             ]);
 
             // displays data along with relationships
@@ -84,7 +88,11 @@ trait InstantServiceTrait
 
             return $query;
         } catch (ErrorException $e) {
-            throw new ErrorException($e->getMessage(), $e->getErrorCode());
+            throw new ErrorException($e->getMessage(), $e->getCode());
+        } catch (\Exception $e) {
+            throw new ErrorException($e->getMessage(), $e->getCode());
+        } catch (\PDOException $e) {
+            throw new ErrorException($e->getMessage(), $e->getCode());
         }
     }
 
@@ -125,7 +133,11 @@ trait InstantServiceTrait
             }
             return $query->create();
         } catch (ErrorException $e) {
-            throw new ErrorException($e->getMessage(), $e->getErrorCode());
+            throw new ErrorException($e->getMessage(), $e->getCode());
+        } catch (\Exception $e) {
+            throw new ErrorException($e->getMessage(), $e->getCode());
+        } catch (\PDOException $e) {
+            throw new ErrorException($e->getMessage(), $e->getCode());
         }
     }
 
@@ -147,7 +159,7 @@ trait InstantServiceTrait
                 }
             }
         } catch (ErrorException $e) {
-            throw new ErrorException($e->getMessage(), $e->getErrorCode());
+            throw new ErrorException($e->getMessage(), $e->getCode());
         }
     }
 
@@ -194,7 +206,7 @@ trait InstantServiceTrait
         } catch (\Exception $e) {
             throw new ErrorException($e->getMessage(), $e->getCode());
         } catch (ErrorException $e) {
-            throw new ErrorException($e->getMessage(), $e->getErrorCode());
+            throw new ErrorException($e->getMessage(), $e->getCode());
         } catch (\PDOException $e) {
             throw new ErrorException($e->getMessage(), $e->getCode());
         }
@@ -270,7 +282,7 @@ trait InstantServiceTrait
 
             return $paginator;
         } catch (ErrorException $e) {
-            throw new ErrorException($e->getMessage(), $e->getErrorCode());
+            throw new ErrorException($e->getMessage(), $e->getCode());
         } catch (\Exception $e) {
             throw new ErrorException($e->getMessage(), $e->getCode());
         }
@@ -304,7 +316,7 @@ trait InstantServiceTrait
             );
             return Helper::toArrayCollection($paginator);
         } catch (ErrorException $e) {
-            throw new ErrorException($e->getMessage(), $e->getErrorCode());
+            throw new ErrorException($e->getMessage(), $e->getCode());
         }
     }
 }
