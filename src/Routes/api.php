@@ -5,7 +5,7 @@ use Diatria\LaravelInstant\Http\Controllers\UserController;
 use Diatria\LaravelInstant\Http\Controllers\PermissionController;
 use Diatria\LaravelInstant\Http\Controllers\RolePermissionController;
 
-Route::prefix("api")->group(function () {
+Route::prefix("api/" . config('laravel-instant.route_prefix'))->group(function () {
     Route::controller(PermissionController::class)->group(function () {
         Route::get("permissions", "all");
         Route::get("permissions/table", "table");
