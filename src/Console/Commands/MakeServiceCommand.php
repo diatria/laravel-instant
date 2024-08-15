@@ -12,14 +12,14 @@ class MakeServiceCommand extends Command
      *
      * @var string
      */
-    protected $signature = "make:service {model}";
+    protected $signature = "make:li-service {model}";
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = "Create a new service class";
+    protected $description = "Create a new Laravel Instant service class";
 
     protected $targetDirectory;
 
