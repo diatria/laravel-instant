@@ -1,0 +1,27 @@
+<?php
+
+namespace {{ namespace }};
+
+use {{ namespace_model }};
+use Illuminate\Http\Request;
+use {{ namespace_service }};
+use Diatria\LaravelInstant\Traits\InstantControllerTrait;
+
+class {{ name }}Controller extends Controller
+{
+    use InstantControllerTrait;
+
+    protected $service, $model;
+    protected $permission = [
+        "create" => "can_create_{{ name_lc }}",
+        "view" => "can_view_{{ name_lc }}",
+        "update" => "can_update_{{ name_lc }}",
+        "delete" => "can_delete_{{ name_lc }}",
+    ];
+
+    public function __construct({{ name }} $model, {{ name }}Service $service)
+    {
+        $this->model = $model;
+        $this->service = $service->initModel();
+    }
+}

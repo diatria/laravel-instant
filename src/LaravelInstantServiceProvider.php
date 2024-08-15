@@ -1,8 +1,9 @@
 <?php
 namespace Diatria\LaravelInstant;
 
-use Diatria\LaravelInstant\Console\Commands\MakeServiceCommand;
 use Illuminate\Support\ServiceProvider;
+use Diatria\LaravelInstant\Console\Commands\MakeServiceCommand;
+use Diatria\LaravelInstant\Console\Commands\MakeControllerCommand;
 
 class LaravelInstantServiceProvider extends ServiceProvider
 {
@@ -12,7 +13,10 @@ class LaravelInstantServiceProvider extends ServiceProvider
     public function boot(): void
     {
         if ($this->app->runningInConsole()) {
-            $this->commands([MakeServiceCommand::class]);
+            $this->commands([
+                MakeControllerCommand::class,
+                MakeServiceCommand::class
+            ]);
         }
 
         $this->loadRoutesFrom(__DIR__ . "/Routes/api.php");
