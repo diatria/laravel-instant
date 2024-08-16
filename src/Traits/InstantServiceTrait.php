@@ -63,12 +63,10 @@ trait InstantServiceTrait
             ]);
 
             // displays data along with relationships
-            if (isset($this->responseFormatRelations)) {
-                $params->put(
-                    "relations",
-                    $params->get("relations", $this->responseFormatRelations)
-                );
-            }
+            $params->put(
+                "relations",
+                $params->get("relations", $this->responseFormatRelations ?? [])
+            );
             $params->put("mode", "first"); // retrieves only one data
 
             // create queries and retrieve data
@@ -77,12 +75,9 @@ trait InstantServiceTrait
             // perform data formatting
             if ($this->responseFormatClass) {
                 $response = $this->responseFormatClass;
-                if (isset($this->responseFormatRelations)) {
-                    $response->with(
-                        $params->get("relations") ??
-                            $this->responseFormatRelations
-                    );
-                }
+                $response->with(
+                    $params->get("relations", $this->responseFormatRelations ?? [])
+                );
                 return $response->object($query);
             }
 
