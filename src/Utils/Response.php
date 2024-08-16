@@ -66,7 +66,7 @@ class Response
     {
         $getSpecificsTrace = collect($errors)->filter(function ($error) {
             $needle = Helper::get($error, "class");
-            foreach (config('app.response.read_class') as $haystack) {
+            foreach (config('app.response.read_class', []) as $haystack) {
                 if (str_contains($needle, $haystack)) {
                     return true;
                 }
