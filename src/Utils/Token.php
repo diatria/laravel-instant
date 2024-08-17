@@ -89,9 +89,9 @@ class Token
     {
         if (isset($_COOKIE[env("APP_TOKEN_NAME") . "_TOKEN"])) {
             return $_COOKIE[env("APP_TOKEN_NAME") . "_TOKEN"];
-        } else {
-            throw new ErrorException("Token Not Found!", 403);
-        }
+        } 
+        
+        return request()->bearerToken() ?? throw new ErrorException("Token Not Found!", 403);
     }
 
     /**
