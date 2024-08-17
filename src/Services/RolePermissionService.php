@@ -1,10 +1,10 @@
 <?php
 namespace Diatria\LaravelInstant\Services;
 
+use App\Models\RolePermission;
 use Diatria\LaravelInstant\Utils\Helper;
 use Diatria\LaravelInstant\Utils\Response;
 use Diatria\LaravelInstant\Utils\ErrorException;
-use Diatria\LaravelInstant\Models\RolePermission;
 use Diatria\LaravelInstant\Traits\InstantServiceTrait;
 use Diatria\LaravelInstant\Http\Responses\RolePermissionResponse;
 
