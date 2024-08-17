@@ -17,7 +17,7 @@ class Token
     {
         try {
             // Verifikasi Token
-            $cookieName = env("APP_TOKEN_NAME") . "_TOKEN";
+            $cookieName = strtolower(env("APP_TOKEN_NAME") . "_TOKEN");
             if (isset($_COOKIE[$cookieName])) {
                 $decoded = JWT::decode(
                     $_COOKIE[$cookieName],
@@ -87,8 +87,8 @@ class Token
      */
     public static function getToken()
     {
-        if (isset($_COOKIE[env("APP_TOKEN_NAME") . "_TOKEN"])) {
-            return $_COOKIE[env("APP_TOKEN_NAME") . "_TOKEN"];
+        if (isset($_COOKIE[strtolower(env("APP_TOKEN_NAME") . "_TOKEN")])) {
+            return $_COOKIE[strtolower(env("APP_TOKEN_NAME") . "_TOKEN")];
         } 
         
         return request()->bearerToken() ?? throw new ErrorException("Token Not Found!", 403);
@@ -123,11 +123,11 @@ class Token
     public function  revokeToken() {
         try {
             setcookie(
-                env("APP_TOKEN_NAME") . "_TOKEN",
+                strtolower(env("APP_TOKEN_NAME") . "_TOKEN"),
                 "",
                 time() - 3600,
                 "/",
-                "localhost",
+                Helper::getDomain(),
                 false,
                 true
             );
@@ -145,7 +145,7 @@ class Token
     {
         try{
             setcookie(
-                env("APP_TOKEN_NAME") . "_TOKEN",
+                strtolower(env("APP_TOKEN_NAME") . "_TOKEN"),
                 $token,
                 Carbon::now()->addHours(6)->getTimestamp(),
                 "/",
