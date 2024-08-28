@@ -14,6 +14,10 @@ class Permission
     public function can($action)
     {
         try {
+            if (config('laravel-instant.disable_permissions')) {
+                return true;
+            }
+
             $this->action = $action;
 
             $tokenInfo = Token::info();
