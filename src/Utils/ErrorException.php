@@ -5,7 +5,7 @@ class ErrorException extends \Exception
 {
     private $errorCode;
 
-    public function __construct($message, $code = null)
+    public function __construct($message, $code = 500)
     {
         $errorCode = $this->translateCode($code);
         parent::__construct($message, $errorCode);
