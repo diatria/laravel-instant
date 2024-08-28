@@ -142,8 +142,13 @@ class Helper
 
     static function getUserID()
     {
-        $user = auth("sanctum")->user();
-        return $user ? $user->id : null;
+        if (config('laravel-instant.auth.driver', 'sanctum') === 'jwt') {
+            $token = Token::info();
+            return $token['user_id'] ?? null;
+        } else {
+            $user = auth("sanctum")->user();
+            return $user ? $user->id : null;
+        }
     }
 
     /**
