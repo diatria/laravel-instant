@@ -29,10 +29,6 @@ class Token
             throw new ErrorException($e->getMessage(), 4001);
         } catch (ExpiredException $e) {
             throw new ErrorException($e->getMessage(), 4002);
-        } catch (\Exception $e) {
-            throw new ErrorException($e->getMessage(), $e->getCode());
-        } catch (ErrorException $e) {
-            throw new ErrorException($e->getMessage(), $e->getCode());
         }
     }
 
@@ -89,9 +85,9 @@ class Token
     {
         if (isset($_COOKIE[strtolower(env("APP_TOKEN_NAME") . "_TOKEN")])) {
             return $_COOKIE[strtolower(env("APP_TOKEN_NAME") . "_TOKEN")];
-        } 
-        
-        return request()->bearerToken() ?? throw new ErrorException("Token Not Found!", 403);
+        }
+
+        return request()->bearerToken() ?? throw new ErrorException("Token Not Found!", 401);
     }
 
     /**
@@ -107,35 +103,26 @@ class Token
             );
             return (array) $decoded;
         } catch (SignatureInvalidException $e) {
-            return Response::error(4001, $e->getMessage());
+            throw new ErrorException($e->getMessage(), 4001);
         } catch (ExpiredException $e) {
-            return Response::error(4002, $e->getMessage());
-        } catch (\Exception $e) {
-            return Response::error($e->getCode(), $e->getMessage());
-        } catch (ErrorException $e) {
-            return Response::error($e->getErrorCode(), $e->getMessage());
+            throw new ErrorException($e->getMessage(), 4002);
         }
     }
 
     /**
      * Remove cookie / token
      */
-    public function  revokeToken() {
-        try {
-            setcookie(
-                strtolower(env("APP_TOKEN_NAME") . "_TOKEN"),
-                "",
-                time() - 3600,
-                "/",
-                Helper::getDomain(),
-                false,
-                true
-            );
-        } catch (\Exception $e) {
-            return Response::error($e->getMessage(), $e->getCode());
-        } catch (ErrorException $e) {
-            return Response::error($e->getMessage(), $e->getCode());
-        }
+    public static function  revokeToken()
+    {
+        setcookie(
+            strtolower(env("APP_TOKEN_NAME") . "_TOKEN"),
+            "",
+            time() - 3600,
+            "/",
+            Helper::getDomain(),
+            false,
+            true
+        );
     }
 
     /**
@@ -143,20 +130,14 @@ class Token
      */
     public static function setToken(string $token)
     {
-        try{
-            setcookie(
-                strtolower(env("APP_TOKEN_NAME") . "_TOKEN"),
-                $token,
-                Carbon::now()->addHours(6)->getTimestamp(),
-                "/",
-                Helper::getDomain(),
-                false,
-                true
-            );
-        } catch (ErrorException $e) {
-            return Response::error($e->getMessage(), $e->getCode());
-        } catch (\Exception $e) {
-            return Response::error($e->getMessage(), $e->getCode());
-        }
+        setcookie(
+            strtolower(env("APP_TOKEN_NAME") . "_TOKEN"),
+            $token,
+            Carbon::now()->addHours(6)->getTimestamp(),
+            "/",
+            Helper::getDomain(),
+            false,
+            true
+        );
     }
 }
