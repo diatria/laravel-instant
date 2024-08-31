@@ -13,7 +13,7 @@ class Token
     /**
      * Melakukan pengecekan / validasi JWT token
      */
-    public static function check()
+    public static function check(): bool
     {
         try {
             // Verifikasi Token
@@ -24,7 +24,7 @@ class Token
                     new Key(env("JWT_KEY"), "HS256")
                 );
             }
-            return isset($decoded) ? $decoded : false;
+            return isset($decoded) ? true : false;
         } catch (SignatureInvalidException $e) {
             throw new ErrorException($e->getMessage(), 4001);
         } catch (ExpiredException $e) {
