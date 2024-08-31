@@ -11,7 +11,6 @@ class Permission extends Model
     use HasFactory, HasUuids;
 
     protected $fillable = [
-        "application_id",
         "name",
         "created_at",
         "updated_at",
