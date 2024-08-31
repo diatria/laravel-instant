@@ -86,7 +86,7 @@ class UserService
                     "email" => $user->email,
                     "name" => $user->name,
                     "phone_number" => $user->phone_number,
-                    "redirect_to" => "oauth",
+                    "redirect_to" => "redirect",
                 ];
             } else {
                 throw new ErrorException("Wrong username or password", 401);
