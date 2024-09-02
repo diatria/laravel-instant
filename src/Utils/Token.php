@@ -13,7 +13,7 @@ class Token
     /**
      * Melakukan pengecekan / validasi JWT token
      */
-    public static function check()
+    public static function check(): bool
     {
         try {
             // Verifikasi Token
@@ -24,15 +24,11 @@ class Token
                     new Key(env("JWT_KEY"), "HS256")
                 );
             }
-            return isset($decoded) ? $decoded : false;
+            return isset($decoded) ? true : false;
         } catch (SignatureInvalidException $e) {
             throw new ErrorException($e->getMessage(), 4001);
         } catch (ExpiredException $e) {
             throw new ErrorException($e->getMessage(), 4002);
-        } catch (\Exception $e) {
-            throw new ErrorException($e->getMessage(), $e->getCode());
-        } catch (ErrorException $e) {
-            throw new ErrorException($e->getMessage(), $e->getCode());
         }
     }
 
@@ -110,17 +106,13 @@ class Token
             throw new ErrorException($e->getMessage(), 4001);
         } catch (ExpiredException $e) {
             throw new ErrorException($e->getMessage(), 4002);
-        } catch (\Exception $e) {
-            throw new ErrorException($e->getMessage(), $e->getCode());
-        } catch (ErrorException $e) {
-            throw new ErrorException($e->getMessage(), $e->getCode());
         }
     }
 
     /**
      * Remove cookie / token
      */
-    public function  revokeToken()
+    public static function  revokeToken()
     {
         setcookie(
             strtolower(env("APP_TOKEN_NAME") . "_TOKEN"),

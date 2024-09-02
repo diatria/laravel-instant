@@ -17,7 +17,7 @@ trait InstantControllerTrait
     {
         try {
             // Permission
-            $permission = config('laravel-instant.class_permission', Diatria\LaravelInstant\Utils\Permission::class);
+            $permission = config('laravel-instant.class_permission', \Diatria\LaravelInstant\Utils\Permission::class);
             (new $permission($this->permission ?? null))->can('view');
 
             // Call Service Find
@@ -38,7 +38,7 @@ trait InstantControllerTrait
     {
         try {
             // Permission
-            $permission = config('laravel-instant.class_permission', Diatria\LaravelInstant\Utils\Permission::class);
+            $permission = config('laravel-instant.class_permission', \Diatria\LaravelInstant\Utils\Permission::class);
             (new $permission($this->permission ?? null))->can('view');
 
             // Call Service All
@@ -55,7 +55,7 @@ trait InstantControllerTrait
     {
         try {
             // Permission
-            $permission = config('laravel-instant.class_permission', Diatria\LaravelInstant\Utils\Permission::class);
+            $permission = config('laravel-instant.class_permission', \Diatria\LaravelInstant\Utils\Permission::class);
             (new $permission($this->permission ?? null))->can('view');
 
             // Call Service Table
@@ -74,7 +74,7 @@ trait InstantControllerTrait
     public function create(Request $request)
     {
         // Permission
-        $permission = config('laravel-instant.class_permission', Diatria\LaravelInstant\Utils\Permission::class);
+        $permission = config('laravel-instant.class_permission', \Diatria\LaravelInstant\Utils\Permission::class);
         (new $permission($this->permission ?? null))->can('create');
         
 
@@ -107,7 +107,7 @@ trait InstantControllerTrait
     public function update(Request $request)
     {
         // Permission
-        $permission = config('laravel-instant.class_permission', Diatria\LaravelInstant\Utils\Permission::class);
+        $permission = config('laravel-instant.class_permission', \Diatria\LaravelInstant\Utils\Permission::class);
         (new $permission($this->permission ?? null))->can('update');
 
         // Call Service Store
@@ -143,7 +143,7 @@ trait InstantControllerTrait
     public function remove(Request $request)
     {
         // Permission
-        $permission = config('laravel-instant.class_permission', Diatria\LaravelInstant\Utils\Permission::class);
+        $permission = config('laravel-instant.class_permission', \Diatria\LaravelInstant\Utils\Permission::class);
         (new $permission($this->permission ?? null))->can('delete');
 
         // Call Service Remove

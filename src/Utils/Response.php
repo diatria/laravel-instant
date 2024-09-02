@@ -45,15 +45,6 @@ class Response
 
     public static function errorJson(Throwable $exception)
     {
-        if ($exception instanceof ErrorException) {
-            return self::json(
-                null,
-                $exception->getMessage(),
-                $exception->getErrorCode(),
-                $exception->getTrace()
-            );
-        }
-
         return self::json(
             null,
             $exception->getMessage(),

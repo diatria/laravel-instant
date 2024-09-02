@@ -64,7 +64,7 @@ class PermissionService
     public function all()
     {
         try {
-            $model = $this->model->with(["application"])->get();
+            $model = $this->model->get();
             return (new PermissionResponse())->array(Helper::toArray($model));
         } catch (ErrorException $e) {
             return Response::error($e->getErrorCode(), $e->getMessage());
