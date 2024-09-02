@@ -97,6 +97,9 @@ class Helper
     {
         try{
             if (!$domain) $domain = $_SERVER["HTTP_ORIGIN"] ?? $_SERVER["HTTP_REFERER"];
+
+            $parsedUrl = parse_url($domain);
+            $domain = isset($parsedUrl['host']) ? $parsedUrl['host'] : throw new ErrorException('Tidak ada domain yang ditemukan', 500);
             $domainWithousHttps = preg_replace("/^http(s)?:\/\//i", "", $domain);
             $findDomain = explode(":", $domainWithousHttps);
             return $findDomain[0];
