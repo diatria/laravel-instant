@@ -133,11 +133,14 @@ class Token
         setcookie(
             strtolower(env("APP_TOKEN_NAME") . "_TOKEN"),
             $token,
-            Carbon::now()->addHours(6)->getTimestamp(),
-            "/",
-            Helper::getDomain(),
-            false,
-            true
+            [
+                "expires" => Carbon::now()->addHours(6)->getTimestamp(),
+                "path" => config('laravel-instant.cookie.path', '/'),
+                "domain" => Helper::getDomain(),
+                "secure" => config('laravel-instant.cookie.secure', false),
+                "httponly" => config('laravel-instant.cookie.httponly', true),
+                "samesite" => config('laravel-instant.cookie.samesite', 'none')
+            ]
         );
     }
 }

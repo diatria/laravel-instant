@@ -93,10 +93,10 @@ class Helper
         return $th->result();
     }
 
-    static function getDomain()
+    static function getDomain(string $domain = null)
     {
         try{
-            $domain = $_SERVER["HTTP_ORIGIN"];
+            if (!$domain) $domain = $_SERVER["HTTP_ORIGIN"] ?? $_SERVER["HTTP_REFERER"];
             $domainWithousHttps = preg_replace("/^http(s)?:\/\//i", "", $domain);
             $findDomain = explode(":", $domainWithousHttps);
             return $findDomain[0];
