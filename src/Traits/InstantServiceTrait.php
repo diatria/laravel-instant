@@ -194,7 +194,7 @@ trait InstantServiceTrait
             }
 
             if ($this->responseFormatClass) {
-                return $this->responseFormatClass->object($data);
+                return collect($this->responseFormatClass->object($data));
             }
 
             return collect($data);
