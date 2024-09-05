@@ -3,7 +3,6 @@
 namespace Diatria\LaravelInstant\Utils;
 
 use Carbon\Carbon;
-use App\Utils\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -93,21 +92,19 @@ class Helper
         return $th->result();
     }
 
-    static function getDomain(string $domain = null)
+    static function getDomain(string $domain = null, string $default = null)
     {
-        try{
-            if (!$domain) $domain = $_SERVER["HTTP_ORIGIN"] ?? $_SERVER["HTTP_REFERER"];
+        $http_origin = isset($_SERVER["HTTP_ORIGIN"]) ? $_SERVER["HTTP_ORIGIN"] : null;
+        $http_referer = isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : null;
 
-            $parsedUrl = parse_url($domain);
-            $domain = isset($parsedUrl['host']) ? $parsedUrl['host'] : throw new ErrorException('Tidak ada domain yang ditemukan', 500);
-            $domainWithousHttps = preg_replace("/^http(s)?:\/\//i", "", $domain);
-            $findDomain = explode(":", $domainWithousHttps);
-            return $findDomain[0];
-        } catch (ErrorException $e) {
-            return Response::error($e->getMessage(), $e->getCode());
-        } catch (\Exception $e) {
-            return Response::error($e->getMessage(), $e->getCode());
-        }
+        if (!$domain) $domain = $http_origin ?? $http_referer;
+        if ($default) return $default;
+
+        $parsedUrl = parse_url($domain);
+        $domain = isset($parsedUrl['host']) ? $parsedUrl['host'] : throw new ErrorException('Tidak ada domain yang ditemukan', 500);
+        $domainWithousHttps = preg_replace("/^http(s)?:\/\//i", "", $domain);
+        $findDomain = explode(":", $domainWithousHttps);
+        return $findDomain[0];
     }
 
     static function getHost()
