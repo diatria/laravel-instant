@@ -161,7 +161,7 @@ trait InstantServiceTrait
     /**
      * @param \Illuminate\Support\Collection $params => array, http_request
      */
-    public function store(Collection $params)
+    public function store(Collection $params): Collection
     {
         try {
             $data = [];
@@ -197,7 +197,7 @@ trait InstantServiceTrait
                 return $this->responseFormatClass->object($data);
             }
 
-            return $data;
+            return collect($data);
         } catch (\Exception $e) {
             throw new ErrorException($e->getMessage(), $e->getCode());
         } catch (ErrorException $e) {
