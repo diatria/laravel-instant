@@ -38,6 +38,13 @@ class QueryMaker
      * @var array
      */
     protected $relations;
+    
+    /**
+     * List relasi untuk mendapatkan jumlah data
+     *
+     * @var array
+     */
+    protected $relationsCount;
 
     /**
      * Menampilkan hasil dalam bentuk pagination atau raw
@@ -141,6 +148,13 @@ class QueryMaker
         return $this;
     }
 
+    public function setRelationsCount($relations) {
+        if ($relations) {
+            $this->relationsCount = $relations;
+        }
+        return $this;
+    }
+
     /**
      * Membuat query
      *
@@ -174,11 +188,15 @@ class QueryMaker
                     }
                 }
             }
-            $query = $query->when($this->relations, function (
-                $query,
-                $relationsQuery
-            ) {
+
+            // Relation
+            $query = $query->when($this->relations, function ($query, $relationsQuery) {
                 $query->with($relationsQuery);
+            });
+
+            // Relation Count
+            $query = $query->when($this->relationsCount, function ($query, $relationsQuery) {
+                $query->withCount($relationsQuery);
             });
 
             if ($this->columns) {

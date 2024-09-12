@@ -249,6 +249,7 @@ trait InstantServiceTrait
                     ])
                 )
                 ->setRelations($params->get("relations"))
+                ->setRelationsCount($params->get("relations_count"))
                 ->setPagination($paginate)
                 ->create();
 
@@ -269,8 +270,8 @@ trait InstantServiceTrait
 
             if ($this->responseFormatClass) {
                 $response = $this->responseFormatClass;
-                if ($params->get("relations")) {
-                    $response->with($params->get("relations"));
+                if ($params->get("relations") || $params->get('relations_count')) {
+                    $response->with(array_merge($params->get("relations"), $params->get('relations_count')));
                 }
                 return $response->table($paginator);
             }
