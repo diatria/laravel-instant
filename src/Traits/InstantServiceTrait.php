@@ -271,7 +271,7 @@ trait InstantServiceTrait
             if ($this->responseFormatClass) {
                 $response = $this->responseFormatClass;
                 if ($params->get("relations") || $params->get('relations_count')) {
-                    $response->with(array_merge($params->get("relations"), $params->get('relations_count')));
+                    $response->with(array_merge($params->get("relations"), $params->get('relations_count', [])));
                 }
                 return $response->table($paginator);
             }
