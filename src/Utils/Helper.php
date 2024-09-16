@@ -98,7 +98,7 @@ class Helper
         $http_referer = isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : null;
 
         if (!$domain) $domain = $http_origin ?? $http_referer;
-        if ($default) return $default;
+        if ($default) $domain = $default;
 
         $parsedUrl = parse_url($domain);
         $domain = isset($parsedUrl['host']) ? $parsedUrl['host'] : throw new ErrorException('Tidak ada domain yang ditemukan', 500);
