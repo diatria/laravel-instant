@@ -98,13 +98,13 @@ class Helper
         $http_referer = isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : null;
 
         if (!$domain) $domain = $http_origin ?? $http_referer;
-        if ($default) $domain = $default;
+        if (!$domain) $domain = $default;
 
         $parsedUrl = parse_url($domain);
-        $domain = isset($parsedUrl['host']) ? $parsedUrl['host'] : throw new ErrorException('Tidak ada domain yang ditemukan', 500);
-        $domainWithousHttps = preg_replace("/^http(s)?:\/\//i", "", $domain);
-        $findDomain = explode(":", $domainWithousHttps);
-        return $findDomain[0];
+        if ($parsedUrl) {
+            return $parsedUrl['host'] . ":" . $parsedUrl['port'];
+        }
+        throw new ErrorException('Tidak ada domain yang ditemukan', 500);
     }
 
     static function getHost()
