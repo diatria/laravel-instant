@@ -101,9 +101,15 @@ class Helper
         if (!$domain) $domain = $default;
 
         $parsedUrl = parse_url($domain);
-        if ($parsedUrl) {
+        
+        if ($parsedUrl && isset($parsedUrl['port'])) {
+            // Return with port
             return $parsedUrl['host'] . ":" . $parsedUrl['port'];
+        } else {
+            // Return without port
+            return $parsedUrl['host'];
         }
+
         throw new ErrorException('Tidak ada domain yang ditemukan', 500);
     }
 
