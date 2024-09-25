@@ -119,7 +119,7 @@ class Token
             "",
             time() - 3600,
             "/",
-            Helper::getDomain(),
+            Helper::getDomain(null, null, ["port" => false]),
             false,
             true
         );
@@ -136,7 +136,7 @@ class Token
             [
                 "expires" => Carbon::now()->addHours(6)->getTimestamp(),
                 "path" => config('laravel-instant.cookie.path', '/'),
-                "domain" => Helper::getDomain(),
+                "domain" => Helper::getDomain(null, request()->domain ?? null, ['port' => false]),
                 "secure" => config('laravel-instant.cookie.secure', false),
                 "httponly" => config('laravel-instant.cookie.httponly', true),
                 "samesite" => config('laravel-instant.cookie.samesite', 'none')
