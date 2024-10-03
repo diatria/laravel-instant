@@ -34,9 +34,7 @@ class Helper
      */
     static function arrayOnly($haystack, $only): Collection
     {
-        return collect($haystack)->map(
-            fn($item) => collect($item)->only($only)
-        );
+        return collect($haystack)->map(fn($item) => collect($item)->only($only));
     }
 
     /**
@@ -54,9 +52,7 @@ class Helper
     static function convertDiskCapacity($size)
     {
         $unit = ["b", "kb", "mb", "gb", "tb", "pb"];
-        return @round($size / pow(1024, $i = floor(log($size, 1024))), 2) .
-            " " .
-            $unit[$i];
+        return @round($size / pow(1024, $i = floor(log($size, 1024))), 2) . " " . $unit[$i];
     }
 
     /**
@@ -68,9 +64,7 @@ class Helper
         if (empty($date)) {
             return null;
         }
-        return Carbon::parse($date, "Asia/Jakarta")
-            ->locale("id_ID")
-            ->isoFormat("D MMMM Y");
+        return Carbon::parse($date, "Asia/Jakarta")->locale("id_ID")->isoFormat("D MMMM Y");
     }
 
     static function dateToday($format = "Y-m-d")
@@ -97,20 +91,24 @@ class Helper
         $http_origin = isset($_SERVER["HTTP_ORIGIN"]) ? $_SERVER["HTTP_ORIGIN"] : null;
         $http_referer = isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : null;
 
-        if (!$domain) $domain = $http_origin ?? $http_referer;
-        if (!$domain) $domain = $default;
-
-        $parsedUrl = parse_url($domain);
-        
-        if ($parsedUrl && isset($parsedUrl['port'])) {
-            // Return with port
-            return $parsedUrl['host'] . ":" . $parsedUrl['port'];
-        } else {
-            // Return without port
-            return $parsedUrl['host'];
+        if (!$domain) {
+            $domain = $http_origin ?? $http_referer;
+        }
+        if (!$domain) {
+            $domain = $default;
         }
 
-        throw new ErrorException('Tidak ada domain yang ditemukan', 500);
+        $parsedUrl = parse_url($domain);
+
+        if ($parsedUrl && isset($parsedUrl["port"])) {
+            // Return with port
+            return $parsedUrl["host"] . ":" . $parsedUrl["port"];
+        } else {
+            // Return without port
+            return $parsedUrl["host"];
+        }
+
+        throw new ErrorException("Tidak ada domain yang ditemukan", 500);
     }
 
     static function getHost()
@@ -148,9 +146,9 @@ class Helper
 
     static function getUserID()
     {
-        if (config('laravel-instant.auth.driver', 'sanctum') === 'jwt') {
+        if (config("laravel-instant.auth.driver", "sanctum") === "jwt") {
             $token = Token::info();
-            return $token['user_id'] ?? null;
+            return $token["user_id"] ?? null;
         } else {
             $user = auth("sanctum")->user();
             return $user ? $user->id : null;
@@ -208,9 +206,9 @@ class Helper
         return json_decode($json);
     }
 
-    static function toArray($haystack, $flag = true)
+    static function toArray($haystack, $arrayAssociative = true)
     {
-        return json_decode(json_encode($haystack), $flag);
+        return json_decode(json_encode($haystack), $arrayAssociative);
     }
 
     static function toArrayCollection($haystack, $flag = true): Collection

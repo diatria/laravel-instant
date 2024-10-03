@@ -38,7 +38,7 @@ class QueryMaker
      * @var array
      */
     protected $relations;
-    
+
     /**
      * List relasi untuk mendapatkan jumlah data
      *
@@ -107,10 +107,7 @@ class QueryMaker
         $this->limit = $request->get("limit");
         $this->order = $request->get("order", "created_at:asc");
         $this->pagination = $request->get("pagination", false);
-        $this->paginationLength = $request->get(
-            "pagination_length",
-            GeneralConfig::PAGINATE_PER_PAGE
-        );
+        $this->paginationLength = $request->get("pagination_length", GeneralConfig::PAGINATE_PER_PAGE);
         $this->mode = $request->get("mode");
         $this->authentication = $request->get("auth");
 
@@ -148,7 +145,8 @@ class QueryMaker
         return $this;
     }
 
-    public function setRelationsCount($relations) {
+    public function setRelationsCount($relations)
+    {
         if ($relations) {
             $this->relationsCount = $relations;
         }
@@ -165,26 +163,16 @@ class QueryMaker
         try {
             $query = $this->model;
             if (!$query) {
-                throw new ErrorException(
-                    "Model not found, please initiate it first, use 'initModel()'",
-                    404
-                );
+                throw new ErrorException("Model not found, please initiate it first, use 'initModel()'", 404);
             }
             if ($this->queries) {
                 foreach ($this->queries as $item) {
                     $item = collect($item);
                     if ($item->get("strict")) {
-                        $query = $query->where(
-                            $item->get("field"),
-                            $item->get("value")
-                        );
+                        $query = $query->where($item->get("field"), $item->get("value"));
                     } else {
                         $value = $item->get("value");
-                        $query = $query->where(
-                            $item->get("field"),
-                            "like",
-                            "%{$value}%"
-                        );
+                        $query = $query->where($item->get("field"), "like", "%{$value}%");
                     }
                 }
             }
@@ -203,7 +191,7 @@ class QueryMaker
                 $query = $query->select(
                     collect($this->columns)
                         ->push("id")
-                        ->toArray()
+                        ->toArray(),
                 );
             }
             if ($this->order) {
