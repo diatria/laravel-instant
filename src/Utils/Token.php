@@ -109,16 +109,8 @@ class Token
      */
     public static function revokeToken()
     {
-        $domain = Helper::getDomain(null, request()->domain, ['port' => false]);
-        setcookie(
-            strtolower(env("APP_TOKEN_NAME") . "_TOKEN"),
-            "",
-            time() - 3600,
-            "/",
-            config('laravel-instant.cookie.domain', $domain),
-            false,
-            true,
-        );
+        $domain = Helper::getDomain(null, request()->domain, ["port" => false]);
+        setcookie(strtolower(env("APP_TOKEN_NAME") . "_TOKEN"), "", time() - 3600, "/", config("laravel-instant.cookie.domain", $domain), false, true);
     }
 
     /**
@@ -126,18 +118,32 @@ class Token
      */
     public static function setToken(string $token)
     {
-        $domain = Helper::getDomain(null, request()->domain ?? null, ['port' => false]);
-        setcookie(
-            strtolower(env("APP_TOKEN_NAME") . "_TOKEN"),
-            $token,
-            [
-                "expires" => Carbon::now()->addHours(6)->getTimestamp(),
-                "path" => config('laravel-instant.cookie.path', '/'),
-                "domain" => config('laravel-instant.cookie.domain', $domain),
-                "secure" => config('laravel-instant.cookie.secure', false),
-                "httponly" => config('laravel-instant.cookie.httponly', true),
-                "samesite" => config('laravel-instant.cookie.samesite', 'none')
-            ]
-        );
+        $domain = Helper::getDomain(null, request()->domain ?? null, ["port" => false]);
+        setcookie(strtolower(env("APP_TOKEN_NAME") . "_TOKEN"), $token, [
+            "expires" => Carbon::now()->addHours(6)->getTimestamp(),
+            "path" => config("laravel-instant.cookie.path", "/"),
+            "domain" => config("laravel-instant.cookie.domain", $domain),
+            "secure" => config("laravel-instant.cookie.secure", false),
+            "httponly" => config("laravel-instant.cookie.httponly", true),
+            "samesite" => config("laravel-instant.cookie.samesite", "none"),
+        ]);
+    }
+
+    /**
+     * Melakukan verifikasi token dari string $token
+     */
+    public static function verify(string $token): array
+    {
+        try {
+            // Verifikasi Token
+            $decoded = JWT::decode($token, new Key(env("JWT_KEY"), "HS256"));
+            return json_decode(json_encode($decoded), true);
+        } catch (SignatureInvalidException $e) {
+            return Response::error($e->getMessage(), 4001);
+        } catch (ExpiredException $e) {
+            return Response::error($e->getMessage(), 4002);
+        } catch (\Exception $e) {
+            return Response::error($e->getMessage(), $e->getCode());
+        }
     }
 }
