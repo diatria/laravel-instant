@@ -86,29 +86,23 @@ class Helper
         return $th->result();
     }
 
-    static function getDomain(string $domain = null, string $default = null)
+    static function getDomain(string $domain = null, string $default = null, array $config = ['port' => true])
     {
         $http_origin = isset($_SERVER["HTTP_ORIGIN"]) ? $_SERVER["HTTP_ORIGIN"] : null;
         $http_referer = isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : null;
 
-        if (!$domain) {
-            $domain = $http_origin ?? $http_referer;
-        }
-        if (!$domain) {
-            $domain = $default;
-        }
+        if (!$domain) $domain = $http_origin ?? $http_referer;
+        if (!$domain) $domain = $default;
+
+        if (!$domain) throw new ErrorException('Tidak ada domain yang ditemukan', 500);
 
         $parsedUrl = parse_url($domain);
-
-        if ($parsedUrl && isset($parsedUrl["port"])) {
-            // Return with port
-            return $parsedUrl["host"] . ":" . $parsedUrl["port"];
-        } else {
-            // Return without port
-            return $parsedUrl["host"];
+        
+        $url = $parsedUrl['host'];
+        if ($config['port'] && isset($parsedUrl['port'])) {
+            $url = $url . ':' . $parsedUrl['port'];
         }
-
-        throw new ErrorException("Tidak ada domain yang ditemukan", 500);
+        return $url;
     }
 
     static function getHost()

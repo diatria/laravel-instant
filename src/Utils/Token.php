@@ -109,12 +109,13 @@ class Token
      */
     public static function revokeToken()
     {
+        $domain = Helper::getDomain(null, request()->domain, ['port' => false]);
         setcookie(
             strtolower(env("APP_TOKEN_NAME") . "_TOKEN"),
             "",
             time() - 3600,
             "/",
-            Helper::getDomain(),
+            config('laravel-instant.cookie.domain', $domain),
             false,
             true,
         );
@@ -125,13 +126,18 @@ class Token
      */
     public static function setToken(string $token)
     {
-        setcookie(strtolower(env("APP_TOKEN_NAME") . "_TOKEN"), $token, [
-            "expires" => Carbon::now()->addHours(6)->getTimestamp(),
-            "path" => config("laravel-instant.cookie.path", "/"),
-            "domain" => Helper::getDomain(),
-            "secure" => config("laravel-instant.cookie.secure", false),
-            "httponly" => config("laravel-instant.cookie.httponly", true),
-            "samesite" => config("laravel-instant.cookie.samesite", "none"),
-        ]);
+        $domain = Helper::getDomain(null, request()->domain ?? null, ['port' => false]);
+        setcookie(
+            strtolower(env("APP_TOKEN_NAME") . "_TOKEN"),
+            $token,
+            [
+                "expires" => Carbon::now()->addHours(6)->getTimestamp(),
+                "path" => config('laravel-instant.cookie.path', '/'),
+                "domain" => config('laravel-instant.cookie.domain', $domain),
+                "secure" => config('laravel-instant.cookie.secure', false),
+                "httponly" => config('laravel-instant.cookie.httponly', true),
+                "samesite" => config('laravel-instant.cookie.samesite', 'none')
+            ]
+        );
     }
 }
