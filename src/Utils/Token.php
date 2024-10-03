@@ -121,11 +121,11 @@ class Token
         $domain = Helper::getDomain(null, request()->domain ?? null, ["port" => false]);
         setcookie(strtolower(env("APP_TOKEN_NAME") . "_TOKEN"), $token, [
             "expires" => Carbon::now()->addHours(6)->getTimestamp(),
-            "path" => config("laravel-instant.cookie.path", "/"),
-            "domain" => config("laravel-instant.cookie.domain", $domain),
-            "secure" => config("laravel-instant.cookie.secure", false),
-            "httponly" => config("laravel-instant.cookie.httponly", true),
-            "samesite" => config("laravel-instant.cookie.samesite", "none"),
+            "path" => config("laravel-instant.cookies.path", "/"),
+            "domain" => config("laravel-instant.cookies.domain", $domain),
+            "secure" => config("laravel-instant.cookies.secure", false),
+            "httponly" => config("laravel-instant.cookies.httponly", true),
+            "samesite" => config("laravel-instant.cookies.samesite", "none"),
         ]);
     }
 
