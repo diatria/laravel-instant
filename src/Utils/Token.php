@@ -110,7 +110,7 @@ class Token
     public static function revokeToken()
     {
         $domain = Helper::getDomain(null, request()->domain, ["port" => false]);
-        setcookie(strtolower(env("APP_TOKEN_NAME") . "_TOKEN"), "", time() - 3600, "/", config("laravel-instant.cookie.domain", $domain), false, true);
+        setcookie(strtolower(env("APP_TOKEN_NAME") . "_TOKEN"), "", time() - 3600, "/", config("laravel-instant.cookies.domain", $domain), false, true);
     }
 
     /**
