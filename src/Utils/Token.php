@@ -19,10 +19,7 @@ class Token
             // Verifikasi Token
             $cookieName = strtolower(env("APP_TOKEN_NAME") . "_TOKEN");
             if (isset($_COOKIE[$cookieName])) {
-                $decoded = JWT::decode(
-                    $_COOKIE[$cookieName],
-                    new Key(env("JWT_KEY"), "HS256")
-                );
+                $decoded = JWT::decode($_COOKIE[$cookieName], new Key(env("JWT_KEY"), "HS256"));
             }
             return isset($decoded) ? true : false;
         } catch (SignatureInvalidException $e) {
@@ -57,7 +54,7 @@ class Token
                 ...$payload,
             ],
             env("JWT_KEY"),
-            "HS256"
+            "HS256",
         );
     }
 
@@ -74,7 +71,7 @@ class Token
                 ...$payload,
             ],
             env("JWT_KEY"),
-            "HS256"
+            "HS256",
         );
     }
 
@@ -92,15 +89,13 @@ class Token
 
     /**
      * Mengambil informasi token
+     * @return array{uuid: string, email: string, name: string, role: string}
      */
     public static function info()
     {
         try {
             // Decrypt token
-            $decoded = JWT::decode(
-                self::getToken(),
-                new Key(env("JWT_KEY"), "HS256")
-            );
+            $decoded = JWT::decode(self::getToken(), new Key(env("JWT_KEY"), "HS256"));
             return (array) $decoded;
         } catch (SignatureInvalidException $e) {
             throw new ErrorException($e->getMessage(), 4001);
@@ -112,16 +107,17 @@ class Token
     /**
      * Remove cookie / token
      */
-    public static function  revokeToken()
+    public static function revokeToken()
     {
+        $domain = Helper::getDomain(null, request()->domain, ['port' => false]);
         setcookie(
             strtolower(env("APP_TOKEN_NAME") . "_TOKEN"),
             "",
             time() - 3600,
             "/",
-            Helper::getDomain(null, null, ["port" => false]),
+            config('laravel-instant.cookie.domain', $domain),
             false,
-            true
+            true,
         );
     }
 
@@ -130,13 +126,14 @@ class Token
      */
     public static function setToken(string $token)
     {
+        $domain = Helper::getDomain(null, request()->domain ?? null, ['port' => false]);
         setcookie(
             strtolower(env("APP_TOKEN_NAME") . "_TOKEN"),
             $token,
             [
                 "expires" => Carbon::now()->addHours(6)->getTimestamp(),
                 "path" => config('laravel-instant.cookie.path', '/'),
-                "domain" => Helper::getDomain(null, request()->domain ?? null, ['port' => false]),
+                "domain" => config('laravel-instant.cookie.domain', $domain),
                 "secure" => config('laravel-instant.cookie.secure', false),
                 "httponly" => config('laravel-instant.cookie.httponly', true),
                 "samesite" => config('laravel-instant.cookie.samesite', 'none')

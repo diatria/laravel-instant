@@ -17,15 +17,11 @@ trait InstantControllerTrait
     {
         try {
             // Permission
-            $permission = config('laravel-instant.class_permission', \Diatria\LaravelInstant\Utils\Permission::class);
-            (new $permission($this->permission ?? null))->can('view');
-
+            $permission = config("laravel-instant.class_permission", \Diatria\LaravelInstant\Utils\Permission::class);
+            (new $permission($this->permission ?? null))->can("view");
             // Call Service Find
-            $data = $this->service->find($request);
-            return Response::json(
-                $data,
-                "Data berhasil diambil dengan id: {$request->id}"
-            );
+            $data = $this->service->find(collect($request->all())->put("id", $request->id));
+            return Response::json($data, "Data berhasil diambil dengan id: {$request->id}");
         } catch (ErrorException $e) {
             return $e->getResponse();
         } catch (\Exception $e) {
@@ -38,8 +34,8 @@ trait InstantControllerTrait
     {
         try {
             // Permission
-            $permission = config('laravel-instant.class_permission', \Diatria\LaravelInstant\Utils\Permission::class);
-            (new $permission($this->permission ?? null))->can('view');
+            $permission = config("laravel-instant.class_permission", \Diatria\LaravelInstant\Utils\Permission::class);
+            (new $permission($this->permission ?? null))->can("view");
 
             // Call Service All
             $data = $this->service->all(collect($request));
@@ -55,15 +51,12 @@ trait InstantControllerTrait
     {
         try {
             // Permission
-            $permission = config('laravel-instant.class_permission', \Diatria\LaravelInstant\Utils\Permission::class);
-            (new $permission($this->permission ?? null))->can('view');
+            $permission = config("laravel-instant.class_permission", \Diatria\LaravelInstant\Utils\Permission::class);
+            (new $permission($this->permission ?? null))->can("view");
 
             // Call Service Table
             $data = $this->service->table(collect($request->all()));
-            return Response::json(
-                $data,
-                "Data halaman {$data->currentPage()} dari {$data->total()} berhasil diambil"
-            );
+            return Response::json($data, "Data halaman {$data->currentPage()} dari {$data->total()} berhasil diambil");
         } catch (ErrorException $e) {
             return Response::errorJson($e);
         } catch (\Exception $e) {
@@ -74,9 +67,8 @@ trait InstantControllerTrait
     public function create(Request $request)
     {
         // Permission
-        $permission = config('laravel-instant.class_permission', \Diatria\LaravelInstant\Utils\Permission::class);
-        (new $permission($this->permission ?? null))->can('create');
-        
+        $permission = config("laravel-instant.class_permission", \Diatria\LaravelInstant\Utils\Permission::class);
+        (new $permission($this->permission ?? null))->can("create");
 
         // Call Service Store
         DB::beginTransaction();
@@ -89,9 +81,7 @@ trait InstantControllerTrait
             // Set variable untuk response
             $isSaved = collect($data)->isNotEmpty();
             $modelName = Helper::getModelName($this->model);
-            $message = $isSaved
-                ? "Data {$modelName} berhasil disimpan"
-                : "Terjadi kesalahan saat menyimpan data {$modelName}";
+            $message = $isSaved ? "Data {$modelName} berhasil disimpan" : "Terjadi kesalahan saat menyimpan data {$modelName}";
 
             DB::commit();
             return Response::json($data, $message, 201);
@@ -107,8 +97,8 @@ trait InstantControllerTrait
     public function update(Request $request)
     {
         // Permission
-        $permission = config('laravel-instant.class_permission', \Diatria\LaravelInstant\Utils\Permission::class);
-        (new $permission($this->permission ?? null))->can('update');
+        $permission = config("laravel-instant.class_permission", \Diatria\LaravelInstant\Utils\Permission::class);
+        (new $permission($this->permission ?? null))->can("update");
 
         // Call Service Store
         DB::beginTransaction();
@@ -121,9 +111,7 @@ trait InstantControllerTrait
             // Set variable untuk response
             $saved = collect($data)->isNotEmpty();
             $modelName = Helper::getModelName($this->model);
-            $message = $saved
-                ? "Data {$modelName} berhasil diperbaharui"
-                : "Terjadi kesalahan saat memperbaharui data {$modelName}";
+            $message = $saved ? "Data {$modelName} berhasil diperbaharui" : "Terjadi kesalahan saat memperbaharui data {$modelName}";
 
             if (!$saved) {
                 throw new ErrorException("Terjadi kesalahan saat memperbaharui data {$modelName}", 500);
@@ -143,8 +131,8 @@ trait InstantControllerTrait
     public function remove(Request $request)
     {
         // Permission
-        $permission = config('laravel-instant.class_permission', \Diatria\LaravelInstant\Utils\Permission::class);
-        (new $permission($this->permission ?? null))->can('delete');
+        $permission = config("laravel-instant.class_permission", \Diatria\LaravelInstant\Utils\Permission::class);
+        (new $permission($this->permission ?? null))->can("delete");
 
         // Call Service Remove
         DB::beginTransaction();
