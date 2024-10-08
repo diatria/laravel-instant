@@ -86,21 +86,27 @@ class Helper
         return $th->result();
     }
 
-    static function getDomain(string $domain = null, string $default = null, array $config = ['port' => true])
+    static function getDomain(string $domain = null, string $default = null, array $config = ["port" => true])
     {
         $http_origin = isset($_SERVER["HTTP_ORIGIN"]) ? $_SERVER["HTTP_ORIGIN"] : null;
         $http_referer = isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : null;
 
-        if (!$domain) $domain = $http_origin ?? $http_referer;
-        if (!$domain) $domain = $default;
+        if (!$domain) {
+            $domain = $http_origin ?? $http_referer;
+        }
+        if (!$domain) {
+            $domain = $default;
+        }
 
-        if (!$domain) throw new ErrorException('Tidak ada domain yang ditemukan', 500);
+        if (!$domain) {
+            throw new ErrorException("Tidak ada domain yang ditemukan", 500);
+        }
 
         $parsedUrl = parse_url($domain);
-        
-        $url = $parsedUrl['host'];
-        if ($config['port'] && isset($parsedUrl['port'])) {
-            $url = $url . ':' . $parsedUrl['port'];
+
+        $url = $parsedUrl["host"];
+        if ($config["port"] && isset($parsedUrl["port"])) {
+            $url = $url . ":" . $parsedUrl["port"];
         }
         return $url;
     }
@@ -125,6 +131,11 @@ class Helper
             $ip = $_SERVER["HTTP_X_FORWARDED_FOR"];
         }
         return $ip;
+    }
+
+    static function getLang()
+    {
+        return $_COOKIE["lang"] ?? "en";
     }
 
     static function getModelName($model)
