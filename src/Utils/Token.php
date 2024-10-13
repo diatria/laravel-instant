@@ -13,26 +13,19 @@ class Token
     /**
      * Melakukan pengecekan / validasi JWT token
      */
-    public static function check()
+    public static function check(): bool
     {
         try {
             // Verifikasi Token
-            $cookieName = env("APP_TOKEN_NAME") . "_TOKEN";
+            $cookieName = strtolower(env("APP_TOKEN_NAME") . "_TOKEN");
             if (isset($_COOKIE[$cookieName])) {
-                $decoded = JWT::decode(
-                    $_COOKIE[$cookieName],
-                    new Key(env("JWT_KEY"), "HS256")
-                );
+                $decoded = JWT::decode($_COOKIE[$cookieName], new Key(env("JWT_KEY"), "HS256"));
             }
-            return isset($decoded) ? $decoded : false;
+            return isset($decoded) ? true : false;
         } catch (SignatureInvalidException $e) {
             throw new ErrorException($e->getMessage(), 4001);
         } catch (ExpiredException $e) {
             throw new ErrorException($e->getMessage(), 4002);
-        } catch (\Exception $e) {
-            throw new ErrorException($e->getMessage(), $e->getCode());
-        } catch (ErrorException $e) {
-            throw new ErrorException($e->getMessage(), $e->getCode());
         }
     }
 
@@ -61,7 +54,7 @@ class Token
                 ...$payload,
             ],
             env("JWT_KEY"),
-            "HS256"
+            "HS256",
         );
     }
 
@@ -78,7 +71,7 @@ class Token
                 ...$payload,
             ],
             env("JWT_KEY"),
-            "HS256"
+            "HS256",
         );
     }
 
@@ -87,55 +80,37 @@ class Token
      */
     public static function getToken()
     {
-        if (isset($_COOKIE[env("APP_TOKEN_NAME") . "_TOKEN"])) {
-            return $_COOKIE[env("APP_TOKEN_NAME") . "_TOKEN"];
-        } else {
-            throw new ErrorException("Token Not Found!", 403);
+        if (isset($_COOKIE[strtolower(env("APP_TOKEN_NAME") . "_TOKEN")])) {
+            return $_COOKIE[strtolower(env("APP_TOKEN_NAME") . "_TOKEN")];
         }
+
+        return request()->bearerToken() ?? throw new ErrorException("Token Not Found!", 401);
     }
 
     /**
      * Mengambil informasi token
+     * @return array{uuid: string, email: string, name: string, role: string}
      */
     public static function info()
     {
         try {
             // Decrypt token
-            $decoded = JWT::decode(
-                self::getToken(),
-                new Key(env("JWT_KEY"), "HS256")
-            );
+            $decoded = JWT::decode(self::getToken(), new Key(env("JWT_KEY"), "HS256"));
             return (array) $decoded;
         } catch (SignatureInvalidException $e) {
-            return Response::error(4001, $e->getMessage());
+            throw new ErrorException($e->getMessage(), 4001);
         } catch (ExpiredException $e) {
-            return Response::error(4002, $e->getMessage());
-        } catch (\Exception $e) {
-            return Response::error($e->getCode(), $e->getMessage());
-        } catch (ErrorException $e) {
-            return Response::error($e->getErrorCode(), $e->getMessage());
+            throw new ErrorException($e->getMessage(), 4002);
         }
     }
 
     /**
      * Remove cookie / token
      */
-    public function  revokeToken() {
-        try {
-            setcookie(
-                env("APP_TOKEN_NAME") . "_TOKEN",
-                "",
-                time() - 3600,
-                "/",
-                "localhost",
-                false,
-                true
-            );
-        } catch (\Exception $e) {
-            return Response::error($e->getMessage(), $e->getCode());
-        } catch (ErrorException $e) {
-            return Response::error($e->getMessage(), $e->getCode());
-        }
+    public static function revokeToken()
+    {
+        $domain = Helper::getDomain(null, request()->domain, ["port" => false]);
+        setcookie(strtolower(env("APP_TOKEN_NAME") . "_TOKEN"), "", time() - 3600, "/", config("laravel-instant.cookies.domain", $domain), false, true);
     }
 
     /**
@@ -143,18 +118,30 @@ class Token
      */
     public static function setToken(string $token)
     {
-        try{
-            setcookie(
-                env("APP_TOKEN_NAME") . "_TOKEN",
-                $token,
-                Carbon::now()->addHours(6)->getTimestamp(),
-                "/",
-                Helper::getDomain(),
-                false,
-                true
-            );
-        } catch (ErrorException $e) {
-            return Response::error($e->getMessage(), $e->getCode());
+        $domain = Helper::getDomain(null, request()->domain ?? null, ["port" => false]);
+        setcookie(strtolower(env("APP_TOKEN_NAME") . "_TOKEN"), $token, [
+            "expires" => Carbon::now()->addHours(6)->getTimestamp(),
+            "path" => config("laravel-instant.cookies.path", "/"),
+            "domain" => config("laravel-instant.cookies.domain", $domain),
+            "secure" => config("laravel-instant.cookies.secure", false),
+            "httponly" => config("laravel-instant.cookies.httponly", true),
+            "samesite" => config("laravel-instant.cookies.samesite", "none"),
+        ]);
+    }
+
+    /**
+     * Melakukan verifikasi token dari string $token
+     */
+    public static function verify(string $token): array
+    {
+        try {
+            // Verifikasi Token
+            $decoded = JWT::decode($token, new Key(env("JWT_KEY"), "HS256"));
+            return json_decode(json_encode($decoded), true);
+        } catch (SignatureInvalidException $e) {
+            return Response::error($e->getMessage(), 4001);
+        } catch (ExpiredException $e) {
+            return Response::error($e->getMessage(), 4002);
         } catch (\Exception $e) {
             return Response::error($e->getMessage(), $e->getCode());
         }

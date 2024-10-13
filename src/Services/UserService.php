@@ -2,14 +2,14 @@
 namespace Diatria\LaravelInstant\Services;
 
 use Carbon\Carbon;
+use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Diatria\LaravelInstant\Utils\Token;
-use Diatria\LaravelInstant\Models\User;
+use Diatria\LaravelInstant\Utils\Helper;
 use Diatria\LaravelInstant\Utils\Response;
 use Diatria\LaravelInstant\Utils\ErrorException;
 use Diatria\LaravelInstant\Traits\InstantServiceTrait;
 use Diatria\LaravelInstant\Http\Responses\UserResponse;
-use Diatria\LaravelInstant\Utils\Helper;
 
 class UserService
 {
@@ -66,30 +66,27 @@ class UserService
     public function login(array $params)
     {
         try {
+            if (!isset($_SERVER["HTTP_ORIGIN"])) $_SERVER["HTTP_ORIGIN"] = env("APP_URL");
+
             $user = $this->model->where("email", $params["email"])->first();
             $isUserAuth = Hash::check($params["password"], $user->password);
             if ($user && $isUserAuth) {
                 $token = Token::create([
+                    "user_id" => $user->id,
                     "email" => $user->email,
                     "role_id" => $user->role_id ?? null,
                 ]);
 
-                setcookie(
-                    "token_" . strtolower(env("APP_NAME")),
-                    $token["token"],
-                    Carbon::now()->addHours(6)->getTimestamp(),
-                    "/",
-                    Helper::getHost(),
-                    false,
-                    true
-                );
+                // Set tooken cookies
+                Token::setToken($token["token"]);
 
                 return [
                     ...$token,
+                    "user_id" => $user->id,
                     "email" => $user->email,
                     "name" => $user->name,
                     "phone_number" => $user->phone_number,
-                    "redirect_to" => "oauth",
+                    "redirect_to" => "redirect",
                 ];
             } else {
                 throw new ErrorException("Wrong username or password", 401);

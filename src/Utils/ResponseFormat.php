@@ -40,10 +40,10 @@ class ResponseFormat
         }
     }
 
-    public function object(object|null $fieldObject)
+    public function object(object|array|null $fieldObject)
     {
         try {
-            $this->field = $fieldObject;
+            $this->field = Helper::toObject($fieldObject);
             return $this->formatingObject();
         } catch (ErrorException $e) {
             throw new ErrorException($e->getMessage(), $e->getErrorCode());
@@ -75,7 +75,7 @@ class ResponseFormat
                 return null;
             }
 
-            return (object) $this->format($this->field);
+            return (object) $this->format(Helper::toObject($this->field));
         } catch (ErrorException $e) {
             throw new ErrorException($e->getMessage(), $e->getErrorCode());
         } catch (\Exception $e) {
@@ -104,13 +104,9 @@ class ResponseFormat
     {
         try {
             $this->fieldArray = $this->fieldTable;
-            return (new TableMaker())->reCreate(
-                $this->fieldTable,
-                $this->formatingArray(),
-                [
-                    "path" => $this->tablePath,
-                ]
-            );
+            return (new TableMaker())->reCreate($this->fieldTable, $this->formatingArray(), [
+                "path" => $this->tablePath,
+            ]);
         } catch (ErrorException $e) {
             throw new ErrorException($e->getMessage(), $e->getErrorCode());
         } catch (\Exception $e) {

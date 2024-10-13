@@ -18,24 +18,31 @@ trait InstantServiceTrait
     /**
      * Retrieve all data
      */
-    public function all()
+    public function all(Collection $params = null)
     {
         try {
-            $query = $this->model->query();
+            if ($params) {
+                $params->only(["relations"]);
+
+                // displays data along with relationships
+                $params->put("relations", $params->get("relations", $this->responseFormatRelations ?? []));
+            }
+
+            $query = $this->query($params);
             if (Helper::hasUserID($this->model)) {
-                $query = $this->model->where("user_id", Helper::getUserID());
+                $query = $query->where("user_id", Helper::getUserID());
                 if (!empty($this->columns)) {
                     $query = $query->select(["id", ...$this->columns]);
                 }
             }
 
             if ($this->responseFormatClass) {
-                return $this->responseFormatClass->array(
-                    $query->get()->toArray()
-                );
+                $response = $this->responseFormatClass;
+                if ($params) {
+                    $response->with($params->get("relations", $this->responseFormatRelations ?? []));
+                }
+                return $response->array($query->toArray());
             }
-
-            return $query->get();
         } catch (ErrorException $e) {
             throw new ErrorException($e->getMessage(), $e->getCode());
         } catch (\Exception $e) {
@@ -47,28 +54,20 @@ trait InstantServiceTrait
 
     /**
      * Retrieves only one selected data
-     * @param int $id "id" column of the database
-     * @param \Illuminate\Http\Request $request parameters to create a query, permitted columns:
+     * @param \Illuminate\Support\Collection $params parameters to create a query, permitted columns:
+     * - id         | required  | int
      * - relations  | optional  | array
      */
-    public function find(Request $request)
+    public function find(Collection $params)
     {
         try {
-            $params = collect($request->all());
             $params->only(["relations"]);
 
             // search for data based on the "id" field
-            $params->put("queries", [
-                ["field" => "id", "value" => $request->id, "strict" => true],
-            ]);
+            $params->put("queries", [["field" => "id", "value" => $params->get("id"), "strict" => true]]);
 
             // displays data along with relationships
-            if (isset($this->responseFormatRelations)) {
-                $params->put(
-                    "relations",
-                    $params->get("relations", $this->responseFormatRelations)
-                );
-            }
+            $params->put("relations", $params->get("relations", $this->responseFormatRelations ?? []));
             $params->put("mode", "first"); // retrieves only one data
 
             // create queries and retrieve data
@@ -77,13 +76,8 @@ trait InstantServiceTrait
             // perform data formatting
             if ($this->responseFormatClass) {
                 $response = $this->responseFormatClass;
-                if (isset($this->responseFormatRelations)) {
-                    $response->with(
-                        $params->get("relations") ??
-                            $this->responseFormatRelations
-                    );
-                }
-                return $response->object($query);
+                $response->with($params->get("relations", $this->responseFormatRelations ?? []));
+                return $response->object($query->toArray());
             }
 
             return $query;
@@ -106,7 +100,7 @@ trait InstantServiceTrait
      * @param Collection $request columns | array
      * @param Collection $request limit | int
      * @param Collection $request mode | 'first' or 'get'
-     * @return Collection \App\Models\User
+     * @return \Illuminate\Support\Collection
      */
     public function query(Collection $request)
     {
@@ -115,17 +109,13 @@ trait InstantServiceTrait
                 collect([
                     "model" => $this->model,
                     "queries" => $request->get("queries"),
-                    "columns" => Helper::get(
-                        $request,
-                        "columns",
-                        $this->columns
-                    ),
+                    "columns" => Helper::get($request, "columns", $this->columns),
                     "limit" => $request->get("limit"),
                     "order" => $request->get("order"),
                     "pagination" => $request->get("pagination"),
                     "mode" => $request->get("mode"),
                     "authentication" => $request->get("authentication"),
-                ])
+                ]),
             );
 
             if ($request->get("relations")) {
@@ -166,15 +156,12 @@ trait InstantServiceTrait
     /**
      * @param \Illuminate\Support\Collection $params => array, http_request
      */
-    public function store(Collection $params)
+    public function store(Collection $params): Collection
     {
         try {
             $data = [];
             // Validator request
-            $validator = Validator::make(
-                $params->all(),
-                $this->columnsRequired
-            );
+            $validator = Validator::make($params->all(), $this->columnsRequired);
             if ($validator->fails()) {
                 $message = $validator->errors()->first();
                 throw new ErrorException($message, 500);
@@ -199,10 +186,10 @@ trait InstantServiceTrait
             }
 
             if ($this->responseFormatClass) {
-                return $this->responseFormatClass->object($data);
+                return collect($this->responseFormatClass->object($data));
             }
 
-            return $data;
+            return collect($data);
         } catch (\Exception $e) {
             throw new ErrorException($e->getMessage(), $e->getCode());
         } catch (ErrorException $e) {
@@ -225,12 +212,8 @@ trait InstantServiceTrait
     public function table(Collection $params)
     {
         try {
-            $paginate = $params->get(
-                "pagination_length",
-                GeneralConfig::PAGINATE_PER_PAGE
-            );
-            $paginationPath =
-                $this->paginationPath ?? $params->get("pagination_path");
+            $paginate = $params->get("pagination_length", GeneralConfig::PAGINATE_PER_PAGE);
+            $paginationPath = $this->paginationPath ?? $params->get("pagination_path");
             $pageOptions = [
                 "path" => env("APP_URL") . $paginationPath,
                 "pageName" => "page",
@@ -241,41 +224,29 @@ trait InstantServiceTrait
                     collect([
                         "model" => $this->model,
                         "queries" => $params->get("queries"),
-                        "columns" => Helper::get(
-                            $params,
-                            "columns",
-                            $this->columns
-                        ),
+                        "columns" => Helper::get($params, "columns", $this->columns),
                         "limit" => $params->get("limit"),
                         "order" => $params->get("order"),
                         "pagination" => true,
                         "mode" => "get",
                         "authentication" => $params->get("authentication"),
-                    ])
+                    ]),
                 )
                 ->setRelations($params->get("relations"))
+                ->setRelationsCount($params->get("relations_count"))
                 ->setPagination($paginate)
                 ->create();
 
             // Data dari database yang diubah ke Array
-            $userCollection = Helper::arrayOnly(
-                $query->items(),
-                $params->get("column")
-            );
+            $userCollection = Helper::arrayOnly($query->items(), $params->get("column"));
 
             // Membuat ulang pagination
-            $paginator = new LengthAwarePaginator(
-                $userCollection,
-                $query->total(),
-                $query->perPage(),
-                $query->currentPage(),
-                $pageOptions
-            );
+            $paginator = new LengthAwarePaginator($userCollection, $query->total(), $query->perPage(), $query->currentPage(), $pageOptions);
 
             if ($this->responseFormatClass) {
                 $response = $this->responseFormatClass;
-                if ($params->get("relations")) {
-                    $response->with($params->get("relations"));
+                if ($params->get("relations") || $params->get("relations_count")) {
+                    $response->with(array_merge($params->get("relations"), $params->get("relations_count", [])));
                 }
                 return $response->table($paginator);
             }
@@ -296,24 +267,14 @@ trait InstantServiceTrait
     {
         try {
             $queryService = $request->get("query");
-            $paginationPath =
-                $this->paginationPath ?? $request->get("pagination_path");
+            $paginationPath = $this->paginationPath ?? $request->get("pagination_path");
             $pageOptions = [
                 "path" => env("APP_URL") . $paginationPath,
                 "pageName" => "page",
             ];
 
-            $userCollection = Helper::arrayOnly(
-                $queryService->items(),
-                $request->get("column")
-            );
-            $paginator = new LengthAwarePaginator(
-                $userCollection,
-                $queryService->total(),
-                $queryService->perPage(),
-                $queryService->currentPage(),
-                $pageOptions
-            );
+            $userCollection = Helper::arrayOnly($queryService->items(), $request->get("column"));
+            $paginator = new LengthAwarePaginator($userCollection, $queryService->total(), $queryService->perPage(), $queryService->currentPage(), $pageOptions);
             return Helper::toArrayCollection($paginator);
         } catch (ErrorException $e) {
             throw new ErrorException($e->getMessage(), $e->getCode());

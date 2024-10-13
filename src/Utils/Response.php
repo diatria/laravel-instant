@@ -20,18 +20,18 @@ class Response
                 ),
                 "request" => request()->all(),
                 "trace" => self::traceError($trace),
-                "http_code" => $errorCode,
             ];
         }
 
         $payload = [
-            "code" => self::toApplicationCode($errorCode),
+            "code" => self::translateCode($errorCode)['application_code'],
+            "internal_code" => $errorCode,
             "message" => "{$message}",
             "data" => $data,
             "data_count" => 0,
             ...$payloadOptional,
         ];
-        return response()->json($payload, self::toHttpCode($errorCode));
+        return response()->json($payload, self::translateCode($errorCode)['http_code']);
     }
 
     public static function error($errorCode, string $message)
@@ -45,15 +45,6 @@ class Response
 
     public static function errorJson(Throwable $exception)
     {
-        if ($exception instanceof ErrorException) {
-            return self::json(
-                null,
-                $exception->getMessage(),
-                $exception->getErrorCode(),
-                $exception->getTrace()
-            );
-        }
-
         return self::json(
             null,
             $exception->getMessage(),
@@ -111,47 +102,34 @@ class Response
     }
 
     /**
-     * Mengembalikan nilai custom kode manjadi nilai kode Http
+     * @return array {application_code: string, http_code: int}
      */
-    public static function toApplicationCode(int|string $statusCode)
-    {
-        $listStatusCode = [
-            "SUCCESS" => 200,
-            "CREATED" => 201,
-            "ACCEPTED" => 202,
-            "UNAUTHORIZED" => 401,
-            "FORBIDDEN" => 403,
-            "NOT_FOUND" => 404,
-            "CONFLICT" => 409,
-            "APPLICATION_ERROR" => 500,
-            "AUTH_INVALID_TOKEN" => 4001,
-            "AUTH_INVALID_SIGNATURE" => 4002,
-            "AUTH_EXPIRED_TOKEN" => 4003,
-            "DB_ERROR" => "42S22",
-            "DB_DUPLICATE_ENTRY" => 23000,
-            "DB_DATA_TOO_LONG" => 22001,
+    static public function translateCode(int|string $code) : array {
+        $httpCode = [
+            200 => ["application_code" => "SUCCESS", "http_code" => 200],
+            201 => ["application_code" => "CREATED", "http_code" => 201],
+            202 => ["application_code" => "ACCEPTED", "http_code" => 201],
+            401 => ["application_code" => "UNAUTHORIZED", "http_code" => 401],
+            403 => ["application_code" => "FORBIDDEN", "http_code" => 403],
+            404 => ["application_code" => "NOT_FOUND", "http_code" => 404],
+            409 => ["application_code" => "CONFLICT", "http_code" => 409],
+            419 => ["application_code" => "PAGE EXPIRED", "http_code" => 419],
+            429 => ["application_code" => "TOO_MANY_REQUESTS", "http_code" => 429],
+            500 => ["application_code" => "APPLICATION_ERROR", "http_code" => 500],
+            4011 => ["application_code" => "AUTH_INVALID_TOKEN", "http_code" => 401],
+            4012 => ["application_code" => "AUTH_INVALID_SIGNATURE", "http_code" => 401],
+            4013 => ["application_code" => "AUTH_EXPIRED_TOKEN", "http_code" => 401],
+            4041 => ["application_code" => "USER_NOT_FOUND", "http_code" => 404],
+            23000 => ["application_code" => "DB_DUPLICATE_ENTRY", "http_code" => 500],
+            22001 => ["application_code" => "DB_DATA_TOO_LONG", "http_code" => 500],
+            "42S22" => ["application_code" => "DB_ERROR", "http_code" => 500],
         ];
 
-        $isFoundApplicationCode = array_search($statusCode, $listStatusCode);
-        return $isFoundApplicationCode ?: "UNDEFINED_CODE";
-    }
-
-    public static function toHttpCode(int|string $statusCode)
-    {
-        $listApplicationCode = [
-            4001 => 401,
-            4002 => 401,
-            4003 => 401,
-            0 => 500,
-            "42S22" => 500,
-            23000 => 500,
-            22001 => 500,
+        if (isset($httpCode[$code])) {
+            return $httpCode[$code];
+        } else return [
+            "application_code" => "UNDEFINED_CODE",
+            "http_code" => 500
         ];
-
-        $isFoundHttpCode = Helper::get($listApplicationCode, $statusCode);
-        if (gettype($statusCode) === "string") {
-            return 500;
-        }
-        return $isFoundHttpCode ?: $statusCode;
     }
 }

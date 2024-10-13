@@ -1,10 +1,10 @@
 <?php
 namespace Diatria\LaravelInstant\Services;
 
+use App\Models\Permission;
 use Illuminate\Support\Collection;
 use Diatria\LaravelInstant\Utils\Helper;
 use Diatria\LaravelInstant\Utils\Response;
-use Diatria\LaravelInstant\Models\Permission;
 use Diatria\LaravelInstant\Utils\ErrorException;
 use Diatria\LaravelInstant\Traits\InstantServiceTrait;
 use Diatria\LaravelInstant\Http\Responses\PermissionResponse;
@@ -64,7 +64,7 @@ class PermissionService
     public function all()
     {
         try {
-            $model = $this->model->with(["application"])->get();
+            $model = $this->model->get();
             return (new PermissionResponse())->array(Helper::toArray($model));
         } catch (ErrorException $e) {
             return Response::error($e->getErrorCode(), $e->getMessage());

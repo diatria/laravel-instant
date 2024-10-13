@@ -34,7 +34,7 @@ class MakeControllerCommand extends Command
 		$explodingArgs = explode('/', $argument);
 		$path = implode('/', Arr::take($explodingArgs, count($explodingArgs) - 1));
 		$name = str_replace('Controller', '', $explodingArgs[count($explodingArgs) - 1]); // UserController => User
-		$namespace = $this->backslash('App\Http\\' . $path);
+		$namespace = $this->backslash('App\Http\Controllers\\' . $path);
 		$namespaceModel = 'App\Models\\' . $name;
 		$namespaceService = $this->backslash('App\Services\\' . $path . '\\' . $name) . 'Service';
 		
@@ -78,8 +78,6 @@ class MakeControllerCommand extends Command
 
 		file_put_contents($targetPath, $stubContent);
 
-		// $this->info(json_encode($explodingArgs));
-		$this->info($namespaceService);
 		$this->info("Controller created successfully.");
 	}
 
