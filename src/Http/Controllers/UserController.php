@@ -60,7 +60,7 @@ class UserController extends Controller
                     "email" => $request->email,
                     "phone_number" => $request->phone_number,
                     "password" => $request->password,
-                    "role_permission_id" => $request->role_permission_id,
+                    "role_id" => $request->role_id,
                 ])
             );
             DB::commit();

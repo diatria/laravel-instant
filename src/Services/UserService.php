@@ -2,8 +2,8 @@
 namespace Diatria\LaravelInstant\Services;
 
 use Carbon\Carbon;
-use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Diatria\LaravelInstant\Models\User;
 use Diatria\LaravelInstant\Utils\Token;
 use Diatria\LaravelInstant\Utils\Helper;
 use Diatria\LaravelInstant\Utils\Response;
@@ -41,7 +41,7 @@ class UserService
      *
      * @var array
      */
-    protected $columnsRequired = ["name", "email", "password"];
+    protected $columnsRequired = ["name", "role_id", "email", "password"];
 
     /**
      * Class Response untuk formating data
