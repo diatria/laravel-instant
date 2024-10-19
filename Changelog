@@ -1,5 +1,6 @@
-19/10/2024 Version 1.0.3
+19/10/2024 Version 1.0.4
 - Fix: move permission inside try catch
+- Fix: add return default value for function `all`
 
 13/10/2024 Version 1.0.2
 - Fix: change column from "role_permission_id" to "role_id"
