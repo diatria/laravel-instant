@@ -43,6 +43,8 @@ trait InstantServiceTrait
                 }
                 return $response->array($query->toArray());
             }
+
+            return $query;
         } catch (ErrorException $e) {
             throw new ErrorException($e->getMessage(), $e->getCode());
         } catch (\Exception $e) {
