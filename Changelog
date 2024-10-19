@@ -1,0 +1,8 @@
+19/10/2024 Version 1.0.3
+- Fix: move permission inside try catch
+
+13/10/2024 Version 1.0.2
+- Fix: change column from "role_permission_id" to "role_id"
+- Fix: change imported model from "App\Models" to "Diatria\..."
+
+Initial Version 1.0.0
