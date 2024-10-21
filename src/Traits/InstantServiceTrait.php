@@ -26,9 +26,11 @@ trait InstantServiceTrait
 
                 // displays data along with relationships
                 $params->put("relations", $params->get("relations", $this->responseFormatRelations ?? []));
+                $query = $this->query($params);
+            } else {
+                $query = $this->query(collect());
             }
 
-            $query = $this->query($params);
             if (Helper::hasUserID($this->model)) {
                 $query = $query->where("user_id", Helper::getUserID());
                 if (!empty($this->columns)) {
