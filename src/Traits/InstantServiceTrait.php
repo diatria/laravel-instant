@@ -2,6 +2,7 @@
 
 namespace Diatria\LaravelInstant\Traits;
 
+use App\Services\UserService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Diatria\LaravelInstant\Utils\Helper;
@@ -31,12 +32,13 @@ trait InstantServiceTrait
                 $query = $this->query(collect());
             }
 
-            if (Helper::hasUserID($this->model)) {
-                $query = $query->where("user_id", Helper::getUserID());
-                if (!empty($this->columns)) {
-                    $query = $query->select(["id", ...$this->columns]);
-                }
-            }
+            // Dimatikan untuk sementara
+            // if (Helper::hasUserID($this->model)) {
+            //     $query = $query->where("user_id", Helper::getUserID());
+            //     if (!empty($this->columns)) {
+            //         $query = $query->select(["id", ...$this->columns]);
+            //     }
+            // }
 
             if ($this->responseFormatClass) {
                 $response = $this->responseFormatClass;
@@ -175,18 +177,19 @@ trait InstantServiceTrait
             $params = $params->only(["id", ...$this->model->getFillable()]);
 
             // auto append if field contains `user_id`
-            $params = Helper::appendUserID($this->model, $params)->toArray();
+            $params = Helper::appendUserID($this->model, $params);
 
             $haveID = Helper::get($params, "id", null);
             if ($haveID) {
                 // Action Update
-                $updated = $this->model->where("id", $haveID)->update($params);
+                $updated = $this->model->where("id", $haveID)->update($params->toArray());
                 if ($updated) {
                     $data = $this->model->find($haveID);
                 }
             } else {
                 // Action Create
-                $data = $this->model->create($params);
+                $params = $params->put("created_by", (new UserService())->initModel()->getID());
+                $data = $this->model->create($params->toArray());
             }
 
             if ($this->responseFormatClass) {
