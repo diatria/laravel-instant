@@ -6,32 +6,29 @@ use Throwable;
 
 class Response
 {
-    public static function json(
-        $data = null,
-        string $message = "",
-        $errorCode = 200,
-        array $trace = []
-    ) {
+    /**
+     * @return Illuminate\Http\JsonResponse
+     */
+    public static function json($data = null, string $message = "", $errorCode = 200, array $trace = [])
+    {
         $payloadOptional = [];
         if (env("APP_DEBUG")) {
             $payloadOptional = [
-                "memory_usage" => Helper::convertDiskCapacity(
-                    memory_get_usage()
-                ),
+                "memory_usage" => Helper::convertDiskCapacity(memory_get_usage()),
                 "request" => request()->all(),
                 "trace" => self::traceError($trace),
             ];
         }
 
         $payload = [
-            "code" => self::translateCode($errorCode)['application_code'],
+            "code" => self::translateCode($errorCode)["application_code"],
             "internal_code" => $errorCode,
             "message" => "{$message}",
             "data" => $data,
             "data_count" => 0,
             ...$payloadOptional,
         ];
-        return response()->json($payload, self::translateCode($errorCode)['http_code']);
+        return response()->json($payload, self::translateCode($errorCode)["http_code"]);
     }
 
     public static function error($errorCode, string $message)
@@ -45,19 +42,14 @@ class Response
 
     public static function errorJson(Throwable $exception)
     {
-        return self::json(
-            null,
-            $exception->getMessage(),
-            $exception->getCode(),
-            $exception->getTrace()
-        );
+        return self::json(null, $exception->getMessage(), $exception->getCode(), $exception->getTrace());
     }
 
     public static function traceError(array $errors)
     {
         $getSpecificsTrace = collect($errors)->filter(function ($error) {
             $needle = Helper::get($error, "class");
-            foreach (config('app.response.read_class', []) as $haystack) {
+            foreach (config("app.response.read_class", []) as $haystack) {
                 if (str_contains($needle, $haystack)) {
                     return true;
                 }
@@ -87,12 +79,7 @@ class Response
      */
     public static function getResponse(\Exception $exception, $data = null)
     {
-        return self::json(
-            $data,
-            $exception->getMessage(),
-            $exception->getCode() ?? 500,
-            $exception->getTrace()
-        );
+        return self::json($data, $exception->getMessage(), $exception->getCode() ?? 500, $exception->getTrace());
     }
 
     public static function isHttpCode(int|string $code): bool
@@ -104,11 +91,13 @@ class Response
     /**
      * @return array {application_code: string, http_code: int}
      */
-    static public function translateCode(int|string $code) : array {
+    public static function translateCode(int|string $code): array
+    {
         $httpCode = [
             200 => ["application_code" => "SUCCESS", "http_code" => 200],
             201 => ["application_code" => "CREATED", "http_code" => 201],
             202 => ["application_code" => "ACCEPTED", "http_code" => 201],
+            400 => ["application_code" => "BAD_REQUEST", "http_code" => 400],
             401 => ["application_code" => "UNAUTHORIZED", "http_code" => 401],
             403 => ["application_code" => "FORBIDDEN", "http_code" => 403],
             404 => ["application_code" => "NOT_FOUND", "http_code" => 404],
@@ -127,9 +116,11 @@ class Response
 
         if (isset($httpCode[$code])) {
             return $httpCode[$code];
-        } else return [
-            "application_code" => "UNDEFINED_CODE",
-            "http_code" => 500
-        ];
+        } else {
+            return [
+                "application_code" => "UNDEFINED_CODE",
+                "http_code" => 500,
+            ];
+        }
     }
 }
