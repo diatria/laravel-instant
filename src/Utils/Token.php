@@ -131,6 +131,7 @@ class Token
 
     /**
      * Melakukan verifikasi token dari string $token
+     * @return array{uuid: string, email: string, name: string, role: string}
      */
     public static function verify(string $token): array
     {
