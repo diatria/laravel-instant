@@ -14,7 +14,7 @@ use Diatria\LaravelInstant\Utils\ErrorException;
 
 trait InstantServiceTrait
 {
-    protected $responseFormatClass;
+    protected $disableDuplicateRefID, $responseFormatClass;
 
     /**
      * Retrieve all data
@@ -59,6 +59,18 @@ trait InstantServiceTrait
     }
 
     /**
+     * @param array{disable_duplicate_ref_id: string} $conf
+     */
+    public function config(array $conf)
+    {
+        if ($conf["disable_duplicate_ref_id"]) {
+            $this->disableDuplicateRefID = true;
+        }
+
+        return $this;
+    }
+
+    /**
      * Retrieves only one selected data
      * @param \Illuminate\Support\Collection $params parameters to create a query, permitted columns:
      * - id         | required  | int
@@ -78,6 +90,10 @@ trait InstantServiceTrait
 
             // create queries and retrieve data
             $query = $this->query($params);
+
+            if (!$query) {
+                throw new ErrorException("Data tidak ditemukan", 404);
+            }
 
             // perform data formatting
             if ($this->responseFormatClass) {
@@ -179,6 +195,20 @@ trait InstantServiceTrait
             // auto append if field contains `user_id`
             $params = Helper::appendUserID($this->model, $params);
 
+            // Config disableDuplicateRefID
+            if ($this->disableDuplicateRefID) {
+                $haveRefID = $this->model->where("ref_id", $params->get("ref_id"))->first();
+                if ($haveRefID) {
+                    $haveRefID->update($params->toArray()); // Update data
+                    $data = $this->model->where("ref_id", $params->get("ref_id"))->first(); // Get latest data
+                    if ($this->responseFormatClass) {
+                        return collect($this->responseFormatClass->object($data));
+                    }
+                    return collect($data);
+                }
+            }
+
+            // Create or Update
             $haveID = Helper::get($params, "id", null);
             if ($haveID) {
                 // Action Update
@@ -192,6 +222,7 @@ trait InstantServiceTrait
                 $data = $this->model->create($params->toArray());
             }
 
+            // Formating Response
             if ($this->responseFormatClass) {
                 return collect($this->responseFormatClass->object($data));
             }
