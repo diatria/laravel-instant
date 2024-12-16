@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Helper
 {
@@ -149,11 +150,14 @@ class Helper
         return "{$modelClassName}:{$action}";
     }
 
-    static function getUserID()
+    static function getUserID(): int
     {
         if (config("laravel-instant.auth.driver", "sanctum") === "jwt") {
             $token = Token::info();
-            return $token["user_id"] ?? null;
+            $user = DB::table("users")
+                ->where("uuid", $token["uuid"])
+                ->first();
+            return self::get($user, "id");
         } else {
             $user = auth("sanctum")->user();
             return $user ? $user->id : null;
