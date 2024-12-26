@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
@@ -179,6 +180,20 @@ class Helper
     static function hasUserID(Model $model): bool
     {
         return collect($model->getFillable())->contains("user_id");
+    }
+
+    /**
+     * Make request template from Illuminate\Support\Facades\Http with cookies
+     */
+    static function http() {
+        $domain = self::getDomain(null, request()->domain ?? null, ["port" => false]);
+        return Http::withCookies(Helper::httpCookies(), $domain);
+    }
+
+    static function httpCookies() {
+        return [
+            strtolower(env("APP_TOKEN_NAME") . "_TOKEN") => Token::getToken()
+        ];
     }
 
     static function log($message)
