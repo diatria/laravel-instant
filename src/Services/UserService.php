@@ -63,6 +63,15 @@ class UserService
         return Token::check();
     }
 
+    public function getID()
+    {
+        if (Token::check()) {
+            $token = Token::info();
+            $user = $this->model->where("uuid", $token["uuid"])->first();
+            return $user->id;
+        }
+    }
+
     public function login(array $params)
     {
         try {
