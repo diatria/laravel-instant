@@ -2,7 +2,6 @@
 
 namespace Diatria\LaravelInstant\Traits;
 
-use App\Services\UserService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Diatria\LaravelInstant\Utils\Helper;
@@ -10,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use Diatria\LaravelInstant\Utils\QueryMaker;
 use Diatria\LaravelInstant\Utils\GeneralConfig;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Diatria\LaravelInstant\Services\UserService;
 use Diatria\LaravelInstant\Utils\ErrorException;
 
 trait InstantServiceTrait
