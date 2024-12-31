@@ -23,9 +23,9 @@ class Token
             }
             return isset($decoded) ? true : false;
         } catch (SignatureInvalidException $e) {
-            throw new ErrorException($e->getMessage(), 4001);
+            throw new ErrorException($e->getMessage(), 4012);
         } catch (ExpiredException $e) {
-            throw new ErrorException($e->getMessage(), 4002);
+            throw new ErrorException($e->getMessage(), 4013);
         }
     }
 
@@ -98,9 +98,13 @@ class Token
             $decoded = JWT::decode(self::getToken(), new Key(env("JWT_KEY"), "HS256"));
             return (array) $decoded;
         } catch (SignatureInvalidException $e) {
-            throw new ErrorException($e->getMessage(), 4001);
+            throw new ErrorException($e->getMessage(), 4012);
         } catch (ExpiredException $e) {
-            throw new ErrorException($e->getMessage(), 4002);
+            throw new ErrorException($e->getMessage(), 4013);
+        } catch (ErrorException $e) {
+            throw new ErrorException($e->getMessage(), $e->getErrorCode());
+        } catch (\Exception $e) {
+            return Response::error($e->getMessage(), $e->getCode());
         }
     }
 
@@ -140,9 +144,11 @@ class Token
             $decoded = JWT::decode($token, new Key(env("JWT_KEY"), "HS256"));
             return json_decode(json_encode($decoded), true);
         } catch (SignatureInvalidException $e) {
-            return Response::error($e->getMessage(), 4001);
+            throw new ErrorException($e->getMessage(), 4012);
         } catch (ExpiredException $e) {
-            return Response::error($e->getMessage(), 4002);
+            throw new ErrorException($e->getMessage(), 4013);
+        } catch (ErrorException $e) {
+            throw new ErrorException($e->getMessage(), $e->getErrorCode());
         } catch (\Exception $e) {
             return Response::error($e->getMessage(), $e->getCode());
         }
