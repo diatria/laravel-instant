@@ -7,7 +7,8 @@ use Throwable;
 class Response
 {
     /**
-     * @return Illuminate\Http\JsonResponse
+     * Generate json response
+     * @return \Illuminate\Http\JsonResponse
      */
     public static function json($data = null, string $message = "", $errorCode = 200, array $trace = [])
     {
@@ -31,7 +32,7 @@ class Response
         return response()->json($payload, self::translateCode($errorCode)["http_code"]);
     }
 
-    public static function error($errorCode, string $message)
+    public static function error(string $message, $errorCode)
     {
         if (self::isHttpCode($errorCode)) {
             throw new \Exception($message, $errorCode);
