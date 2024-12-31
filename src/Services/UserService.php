@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Hash;
 use Diatria\LaravelInstant\Models\User;
 use Diatria\LaravelInstant\Utils\Token;
 use Diatria\LaravelInstant\Utils\Helper;
+use Illuminate\Support\Facades\Validator;
 use Diatria\LaravelInstant\Utils\Response;
 use Diatria\LaravelInstant\Utils\ErrorException;
 use Diatria\LaravelInstant\Traits\InstantServiceTrait;
@@ -74,34 +75,45 @@ class UserService
 
     public function login(array $params)
     {
-        try {
-            if (!isset($_SERVER["HTTP_ORIGIN"])) $_SERVER["HTTP_ORIGIN"] = env("APP_URL");
+        // Validator request
+        $validator = Validator::make($params, $this->columnsRequired);
+        if ($validator->fails()) {
+            $message = $validator->errors()->first();
+            throw new ErrorException($message, 500);
+        }
 
-            $user = $this->model->where("email", $params["email"])->first();
-            $isUserAuth = Hash::check($params["password"], $user->password);
-            if ($user && $isUserAuth) {
-                $token = Token::create([
-                    "user_id" => $user->id,
-                    "email" => $user->email,
-                    "role_id" => $user->role_id ?? null,
-                ]);
+        if (!isset($_SERVER["HTTP_ORIGIN"])) {
+            $_SERVER["HTTP_ORIGIN"] = env("APP_URL");
+        }
 
-                // Set tooken cookies
-                Token::setToken($token["token"]);
+        $user = $this->model->where("email", $params["email"])->first();
+        if (!$user) {
+            throw new ErrorException("User not found", 404);
+        }
 
-                return [
-                    ...$token,
-                    "user_id" => $user->id,
-                    "email" => $user->email,
-                    "name" => $user->name,
-                    "phone_number" => $user->phone_number,
-                    "redirect_to" => "redirect",
-                ];
-            } else {
-                throw new ErrorException("Wrong username or password", 401);
-            }
-        } catch (ErrorException $e) {
-            return Response::error($e->getErrorCode(), $e->getMessage());
+        $isUserAuth = Hash::check($params["password"], $user->password);
+        if ($user && $isUserAuth) {
+            $token = Token::create([
+                "user_id" => $user->id,
+                "uuid" => $user->uuid ?? null,
+                "email" => $user->email,
+                "role_id" => $user->role_id ?? null,
+            ]);
+
+            // Set tooken cookies
+            Token::setToken($token["token"]);
+
+            return [
+                ...$token,
+                "user_id" => $user->id,
+                "uuid" => $user->uuid ?? null,
+                "email" => $user->email,
+                "name" => $user->name,
+                "phone_number" => $user->phone_number,
+                "redirect_to" => "redirect",
+            ];
+        } else {
+            throw new ErrorException("Wrong username or password", 401);
         }
     }
 }
