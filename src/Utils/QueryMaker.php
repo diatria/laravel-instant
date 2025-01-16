@@ -96,7 +96,7 @@ class QueryMaker
      * - columns			optional	Array
      * - pagination			optional	Boolean
      * - pagination_length	optional	Number
-     * - mode				optional	Enum('first', 'all')
+     * - mode				optional	Enum('first', 'get')
      */
     public function initial(Collection $request)
     {
