@@ -22,11 +22,11 @@ trait InstantControllerTrait
             // Permission
             $permission = config("laravel-instant.class_permission", \Diatria\LaravelInstant\Utils\Permission::class);
             (new $permission($this->permission ?? null))->can("view");
-            
+
             // Set Parameter
             $params = collect($request->all());
-            if ($params->has('relations')) {
-                $params = $params->merge(['relations' => json_decode($request->relations)]);
+            if ($params->has("relations")) {
+                $params = $params->merge(["relations" => $request->relations]);
             }
             $params = $params->put("id", $request->id);
 
