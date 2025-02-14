@@ -220,6 +220,7 @@ trait InstantServiceTrait
                 // Action Create
                 $params = $params->put("created_by", (new UserService())->initModel()->getID());
                 $data = $this->model->create($params->toArray());
+                $data = $this->model->find($data->id);
             }
 
             // Formating Response
