@@ -35,7 +35,7 @@ class UserService
      *
      * @var array
      */
-    protected $columns = ["name", "email", "phone_number"];
+    protected $columns = ["name", 'role_id', "email", "phone_number"];
 
     /**
      * List kolom yang required ketika akan menyimpan data
