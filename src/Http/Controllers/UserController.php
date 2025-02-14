@@ -17,6 +17,12 @@ class UserController extends Controller
     use InstantControllerTrait;
 
     protected $service, $model;
+    protected $permission = [
+        "create" => "can_create_user",
+        "view" => "can_view_user",
+        "update" => "can_update_user",
+        "delete" => "can_delete_user",
+    ];
 
     public function __construct(User $model, UserService $service)
     {
