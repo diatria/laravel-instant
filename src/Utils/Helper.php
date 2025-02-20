@@ -106,7 +106,7 @@ class Helper
 
         $parsedUrl = parse_url($domain);
 
-        $url = $parsedUrl["host"];
+        $url = $parsedUrl["host"] ?? $parsedUrl["path"];
         if ($config["port"] && isset($parsedUrl["port"])) {
             $url = $url . ":" . $parsedUrl["port"];
         }
