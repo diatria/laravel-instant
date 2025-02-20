@@ -79,4 +79,17 @@ class UserController extends Controller
             return Response::errorJson($e);
         }
     }
+
+    public function refreshToken (Request $request) {
+        try {
+            $data = $this->service->refreshToken($request->refresh_token);
+            return Response::json($data);
+        } catch (ErrorException $e) {
+            DB::rollBack();
+            return Response::errorJson($e);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return Response::errorJson($e);
+        }
+    }
 }

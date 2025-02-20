@@ -18,8 +18,16 @@ class Token
         try {
             // Verifikasi Token
             $cookieName = strtolower(env("APP_TOKEN_NAME") . "_TOKEN");
-            if (isset($_COOKIE[$cookieName])) {
-                $decoded = JWT::decode($_COOKIE[$cookieName], new Key(env("JWT_KEY"), "HS256"));
+            if (config('laravel-instant.auth.allow_check_with_bearer', false)) {
+                // Check with bearer and cookies
+                if (self::getToken()) {
+                    $decoded = JWT::decode(self::getToken(), new Key(env("JWT_KEY"), "HS256"));
+                }
+            } else {
+                // Check only with cookies
+                if (isset($_COOKIE[$cookieName])) {
+                    $decoded = JWT::decode($_COOKIE[$cookieName], new Key(env("JWT_KEY"), "HS256"));
+                }
             }
             return isset($decoded) ? true : false;
         } catch (SignatureInvalidException $e) {

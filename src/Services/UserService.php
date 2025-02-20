@@ -116,4 +116,11 @@ class UserService
             throw new ErrorException("Wrong username or password", 401);
         }
     }
+
+    /**
+     * Melakukan refresh token dan melakukan set ulang cookies
+     */
+    public function refreshToken ($refreshToken) {
+        return Token::refreshToken($refreshToken);
+    }
 }

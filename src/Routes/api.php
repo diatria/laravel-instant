@@ -40,6 +40,7 @@ Route::prefix("api/" . config('laravel-instant.route.prefix'))->group(function (
         Route::get("users/{id}", "find");
         Route::post("users", "register");
         Route::post("users/login", "login");
+        Route::post("users/token/refresh", "refreshToken");
         Route::put("users/{id}", "update");
         Route::delete("users/{id?}", "remove");
     });
