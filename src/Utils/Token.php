@@ -29,6 +29,7 @@ class Token
                     $decoded = JWT::decode($_COOKIE[$cookieName], new Key(env("JWT_KEY"), "HS256"));
                 }
             }
+
             return isset($decoded) ? true : false;
         } catch (SignatureInvalidException $e) {
             throw new ErrorException($e->getMessage(), 4012);
@@ -50,14 +51,14 @@ class Token
 
     /**
      * Create token only
-     * Default expired 6 hours
+     * Default expired 1 hours
      */
     public function createToken(array $payload)
     {
         return JWT::encode(
             [
                 "iss" => env("APP_URL"), // Issuer (pihak yang mengeluarkan token)
-                "exp" => Carbon::now()->addHours(6)->getTimestamp(), // Expiration time (waktu kadaluarsa token)
+                "exp" => Carbon::now()->addSeconds(config("laravel-instant.auth.token_expires", 3600))->getTimestamp(), // Expiration time (waktu kadaluarsa token)
                 "iat" => Carbon::now()->getTimestamp(), // Issued at time (waktu token dikeluarkan)
                 ...$payload,
             ],
@@ -74,7 +75,7 @@ class Token
         return JWT::encode(
             [
                 "iss" => env("APP_URL"), // Issuer (pihak yang mengeluarkan token)
-                "exp" => Carbon::now()->addDays(3)->getTimestamp(), // Expiration time (waktu kadaluarsa token)
+                "exp" => Carbon::now()->addSeconds(config("laravel-instant.auth.token_refresh_expires", 21600))->getTimestamp(), // Expiration time (waktu kadaluarsa token)
                 "iat" => Carbon::now()->getTimestamp(), // Issued at time (waktu token dikeluarkan)
                 ...$payload,
             ],
@@ -84,9 +85,9 @@ class Token
     }
 
     /**
-     * Mengambil informasi token dari cookies
+     * Mengambil informasi token dari cookies dan bearer token
      */
-    public static function getToken()
+    public static function getToken(): string
     {
         if (isset($_COOKIE[strtolower(env("APP_TOKEN_NAME") . "_TOKEN")])) {
             return $_COOKIE[strtolower(env("APP_TOKEN_NAME") . "_TOKEN")];
@@ -126,13 +127,25 @@ class Token
     }
 
     /**
+     * Melakukan generate ulang token menggunakan refresh token
+     */
+    public static function refreshToken (string $refreshToken) {
+        $payload = self::verify($refreshToken);
+
+        $payload = collect($payload)->except(['iss', 'exp', 'iat'])->toArray();
+        $newToken = self::create($payload);
+        self::setToken($newToken['token']);
+        return $newToken;
+    }
+
+    /**
      * Melakukan set token ke cookies
      */
-    public static function setToken(string $token)
+    public static function setToken(string $token): bool
     {
         $domain = Helper::getDomain(null, request()->domain ?? null, ["port" => false]);
-        setcookie(strtolower(env("APP_TOKEN_NAME") . "_TOKEN"), $token, [
-            "expires" => Carbon::now()->addHours(6)->getTimestamp(),
+        return setcookie(strtolower(env("APP_TOKEN_NAME") . "_TOKEN"), $token, [
+            "expires" => Carbon::now()->addSeconds(config("laravel-instant.cookies.expires", 3600))->getTimestamp(),
             "path" => config("laravel-instant.cookies.path", "/"),
             "domain" => config("laravel-instant.cookies.domain", $domain),
             "secure" => config("laravel-instant.cookies.secure", false),
