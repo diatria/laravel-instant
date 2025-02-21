@@ -30,11 +30,12 @@ class RolePermissionController extends Controller
         $this->service = $service->initModel($model);
     }
 
-    public function table()
+    public function table(Request $request)
     {
         try {
             $data = $this->service->table(
                 collect([
+                    "queries" => $request->queries,
                     "relations" => ["Role", "Permission"],
                 ])
             );
