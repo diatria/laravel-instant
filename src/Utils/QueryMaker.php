@@ -170,6 +170,8 @@ class QueryMaker
                     $item = collect($item);
                     if ($item->get("strict")) {
                         $query = $query->where($item->get("field"), $item->get("value"));
+                    } elseif (gettype($item->get("value")) === 'object') {
+                        $query = $query->whereIn($item->get("field"), $item->get("value"));
                     } else {
                         $value = $item->get("value");
                         $query = $query->where($item->get("field"), "like", "%{$value}%");
