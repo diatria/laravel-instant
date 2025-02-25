@@ -129,7 +129,8 @@ class Token
     /**
      * Melakukan generate ulang token menggunakan refresh token
      */
-    public static function refreshToken (string $refreshToken) {
+    public static function refreshToken(string $refreshToken)
+    {
         $payload = self::verify($refreshToken);
 
         $payload = collect($payload)->except(['iss', 'exp', 'iat'])->toArray();
@@ -143,7 +144,7 @@ class Token
      */
     public static function setToken(string $token): bool
     {
-        $domain = Helper::getDomain(null, request()->domain ?? null, ["port" => false]);
+        $domain = Helper::getDomain(config('laravel-instant.cookies.domain'), request()->domain ?? null, ["port" => false]);
         return setcookie(strtolower(env("APP_TOKEN_NAME") . "_TOKEN"), $token, [
             "expires" => Carbon::now()->addSeconds(config("laravel-instant.cookies.expires", 3600))->getTimestamp(),
             "path" => config("laravel-instant.cookies.path", "/"),
