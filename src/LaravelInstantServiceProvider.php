@@ -1,4 +1,5 @@
 <?php
+
 namespace Diatria\LaravelInstant;
 
 use Illuminate\Support\ServiceProvider;
@@ -32,10 +33,10 @@ class LaravelInstantServiceProvider extends ServiceProvider
             ]);
         }
 
-        if (app()->version() >= 11) {
+        if ((int) app()->version() >= 11) {
             $this->publishesMigrations([
                 __DIR__ . '/../publish/database/migrations/' . config('laravel-instant.database.primary_key', 'int') => database_path('migrations'),
-            ], 'li-migration');    
+            ], 'li-migration');
         }
 
         $this->publishes([
