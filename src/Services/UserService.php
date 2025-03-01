@@ -35,7 +35,7 @@ class UserService
      *
      * @var array
      */
-    protected $columns = ["name", 'role_id', "email", "phone_number"];
+    protected $columns = ["name", "role_id", "email", "phone_number"];
 
     /**
      * List kolom yang required ketika akan menyimpan data
@@ -120,7 +120,11 @@ class UserService
     /**
      * Melakukan refresh token dan melakukan set ulang cookies
      */
-    public function refreshToken ($refreshToken) {
+    public function refreshToken($refreshToken)
+    {
+        if (empty($refreshToken)) {
+            throw new ErrorException("Token not found!", 404);
+        }
         return Token::refreshToken($refreshToken);
     }
 }
