@@ -27,17 +27,9 @@ class LaravelInstantServiceProvider extends ServiceProvider
             __DIR__ . '/../publish/models/' . config('laravel-instant.database.primary_key', 'int') . '/RolePermission.php' => app_path('Models/RolePermission.php'),
         ], 'li-model');
 
-        if (app()->version() <= 10) {
-            $this->loadMigrationsFrom([
-                __DIR__ . '/../publish/database/migrations/' . config('laravel-instant.database.primary_key', 'int'),
-            ]);
-        }
-
-        if ((int) app()->version() >= 11) {
-            $this->publishesMigrations([
-                __DIR__ . '/../publish/database/migrations/' . config('laravel-instant.database.primary_key', 'int') => database_path('migrations'),
-            ], 'li-migration');
-        }
+        $this->loadMigrationsFrom([
+            __DIR__ . '/../publish/database/migrations/' . config('laravel-instant.database.primary_key', 'int'),
+        ]);
 
         $this->publishes([
             __DIR__ . '/../publish/database/seeders/PermissionSeeder.php' => database_path('seeders/PermissionSeeder.php'),
