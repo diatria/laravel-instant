@@ -101,15 +101,15 @@ class QueryMaker
     public function initial(Collection $request)
     {
         // Initial variable
-        $this->model = $request->get("model");
-        $this->queries = $request->get("queries", []);
-        $this->columns = $request->get("columns", []);
-        $this->limit = $request->get("limit");
-        $this->order = $request->get("order", "created_at:asc");
-        $this->pagination = $request->get("pagination", false);
-        $this->paginationLength = $request->get("pagination_length", GeneralConfig::PAGINATE_PER_PAGE);
-        $this->mode = $request->get("mode");
-        $this->authentication = $request->get("auth");
+        $this->model = $request->get('model');
+        $this->queries = $request->get('queries', []);
+        $this->columns = $request->get('columns', []);
+        $this->limit = $request->get('limit');
+        $this->order = $request->get('order', 'created_at:asc');
+        $this->pagination = $request->get('pagination', false);
+        $this->paginationLength = $request->get('pagination_length', GeneralConfig::PAGINATE_PER_PAGE);
+        $this->mode = $request->get('mode');
+        $this->authentication = $request->get('auth');
 
         return $this;
     }
@@ -168,13 +168,13 @@ class QueryMaker
             if ($this->queries) {
                 foreach ($this->queries as $item) {
                     $item = collect($item);
-                    if ($item->get("strict")) {
-                        $query = $query->where($item->get("field"), $item->get("value"));
-                    } elseif (gettype($item->get("value")) === 'object') {
-                        $query = $query->whereIn($item->get("field"), $item->get("value"));
+                    if ($item->get('strict')) {
+                        $query = $query->where($item->get('field'), $item->get('value'));
+                    } elseif (gettype($item->get('value')) === 'object') {
+                        $query = $query->whereIn($item->get('field'), $item->get('value'));
                     } else {
-                        $value = $item->get("value");
-                        $query = $query->where($item->get("field"), "like", "%{$value}%");
+                        $value = $item->get('value');
+                        $query = $query->where($item->get('field'), 'like', "%{$value}%");
                     }
                 }
             }
@@ -192,17 +192,17 @@ class QueryMaker
             if ($this->columns) {
                 $query = $query->select(
                     collect($this->columns)
-                        ->push("id")
+                        ->push('id')
                         ->toArray(),
                 );
             }
             if ($this->order) {
-                $splitText = explode(":", $this->order); // Contoh text: 'name:asc'
+                $splitText = explode(':', $this->order); // Contoh text: 'name:asc'
                 $order = [
-                    "field" => $splitText[0] ?? "created_at",
-                    "mode" => $splitText[1] ?? "asc",
+                    'field' => $splitText[0] ?? 'created_at',
+                    'mode' => $splitText[1] ?? 'asc',
                 ];
-                $query = $query->orderBy($order["field"], $order["mode"]);
+                $query = $query->orderBy($order['field'], $order['mode']);
             }
             if ($this->pagination === false) {
                 $this->unsetPagination();
@@ -211,15 +211,15 @@ class QueryMaker
                 return $query->paginate($this->paginationLength);
             }
             if ($this->authentication) {
-                $query = $query->where("user_id", Helper::getUserID());
+                $query = $query->where('user_id', Helper::getUserID());
             }
             if ($this->limit) {
                 return $query->limit($this->limit)->get();
             }
-            if ($this->mode === "first") {
+            if ($this->mode === 'first') {
                 return $query->first();
             }
-            if ($this->mode === "get") {
+            if ($this->mode === 'get') {
                 return $query->get();
             }
 
