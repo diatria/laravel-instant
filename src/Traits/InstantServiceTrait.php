@@ -213,9 +213,7 @@ trait InstantServiceTrait
             if ($haveID) {
                 // Action Update
                 $updated = $this->model->where('id', $haveID)->update($params->toArray());
-                if ($updated) {
-                    $data = $this->model->find($haveID);
-                }
+                $data = $this->model->find($haveID);
             } else {
                 // Action Create
                 $params = $params->put('created_by', (new UserService())->initModel()->getID());
