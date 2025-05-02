@@ -156,7 +156,6 @@ class QueryMaker
     /**
      * Membuat query
      *
-     * @return \Illuminate\Support\Collection
      */
     public function create()
     {
