@@ -82,7 +82,7 @@ trait InstantServiceTrait
             $params->only(['relations']);
 
             // search for data based on the "id" field
-            $params->put('queries', [['field' => 'id', 'value' => $params->get('id'), 'strict' => true]]);
+            $params->put('queries', [['field' => 'id', 'value' => $params->get('id'), 'strict' => true], ...$params->get('queries', [])]);
 
             // displays data along with relationships
             $params->put('relations', $params->get('relations', $this->responseFormatRelations ?? []));
@@ -122,7 +122,7 @@ trait InstantServiceTrait
      * @param Collection $request columns | array
      * @param Collection $request limit | int
      * @param Collection $request mode | 'first' or 'get'
-     * @return \Illuminate\Support\Collection
+     * @return TValue|null
      */
     public function query(Collection $request)
     {
