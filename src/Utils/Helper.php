@@ -155,8 +155,11 @@ class Helper
     {
         if (config("laravel-instant.auth.driver", "sanctum") === "jwt") {
             $token = Token::info();
+            if (!isset($token['uuid'])) {
+                throw new ErrorException('UUID tidak ditemukan didalam token!', 500);
+            }
             $user = DB::table("users")
-                ->where("uuid", $token["uuid"])
+                ->where("uuid", $token["uuid"] ?? null)
                 ->first();
             return self::get($user, "id");
         } else {
