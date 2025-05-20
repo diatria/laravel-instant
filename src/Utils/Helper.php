@@ -88,7 +88,7 @@ class Helper
         return $th->result();
     }
 
-    static function getDomain(string $domain = null, string $default = null, array $config = ["port" => true])
+    static function getDomain(?string $domain = null, ?string $default = null, array $config = ["port" => true])
     {
         $http_origin = isset($_SERVER["HTTP_ORIGIN"]) ? $_SERVER["HTTP_ORIGIN"] : null;
         $http_referer = isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : null;
