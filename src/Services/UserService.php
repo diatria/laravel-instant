@@ -68,9 +68,12 @@ class UserService
     {
         if (Token::check()) {
             $token = Token::info();
-            $user = $this->model->where("uuid", $token["uuid"])->first();
-            return $user->id;
+            if (collect($token)->has('uuid')) {
+                $user = $this->model->where("uuid", $token["uuid"])->first();
+                return $user->id;
+            }
         }
+        return null;
     }
 
     public function login(array $params)
