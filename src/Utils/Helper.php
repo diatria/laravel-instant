@@ -88,7 +88,7 @@ class Helper
         return $th->result();
     }
 
-    static function getDomain(?string $domain = null, ?string $default = null, array $config = ["port" => true])
+    static function getDomain(?string $domain = null, ?string $default = null, array $config = ["port" => true, "throw_error" => false])
     {
         $http_origin = isset($_SERVER["HTTP_ORIGIN"]) ? $_SERVER["HTTP_ORIGIN"] : null;
         $http_referer = isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : null;
@@ -100,7 +100,7 @@ class Helper
             $domain = $default;
         }
 
-        if (!$domain) {
+        if (!$domain && $config["throw_error"]) {
             throw new ErrorException("Tidak ada domain yang ditemukan", 500);
         }
 
