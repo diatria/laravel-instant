@@ -216,6 +216,14 @@ class Helper
         return $hoursLeadingZero . ":" . $minutesLeadingZero . ":00";
     }
 
+    /**
+     * Menampilkan url storage_path dengan base path APP_URL
+     * @param string $path
+     */
+    static public function storageUrl (string $path) {
+        return config('app.url') . '//storage/' . $path;
+    }
+
     static function throw($message): \Exception
     {
         throw new \Exception($message);
