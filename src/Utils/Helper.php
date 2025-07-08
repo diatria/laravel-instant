@@ -221,7 +221,7 @@ class Helper
      * @param string $path
      */
     static public function storageUrl (string $path) {
-        return config('app.url') . '//storage/' . $path;
+        return config('app.url') . '/storage/' . $path;
     }
 
     static function throw($message): \Exception
