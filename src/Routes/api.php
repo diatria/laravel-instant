@@ -35,11 +35,12 @@ Route::prefix("api/" . config('laravel-instant.route.prefix'))->group(function (
 
     Route::controller(UserController::class)->group(function () {
         Route::get("users", "all");
-        Route::get("users/check-token", "check"); // Check validation token
+        Route::get("users/check", "check"); // Check validation token
         Route::get("users/table", "table");
         Route::get("users/{id}", "find");
         Route::post("users", "register");
         Route::post("users/login", "login");
+        Route::post("users/token/refresh", "refreshToken");
         Route::put("users/{id}", "update");
         Route::delete("users/{id?}", "remove");
     });

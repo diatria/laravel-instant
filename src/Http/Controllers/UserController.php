@@ -17,6 +17,12 @@ class UserController extends Controller
     use InstantControllerTrait;
 
     protected $service, $model;
+    protected $permission = [
+        "create" => "can_create_user",
+        "view" => "can_view_user",
+        "update" => "can_update_user",
+        "delete" => "can_delete_user",
+    ];
 
     public function __construct(User $model, UserService $service)
     {
@@ -60,10 +66,23 @@ class UserController extends Controller
                     "email" => $request->email,
                     "phone_number" => $request->phone_number,
                     "password" => $request->password,
-                    "role_permission_id" => $request->role_permission_id,
+                    "role_id" => $request->role_id,
                 ])
             );
             DB::commit();
+            return Response::json($data);
+        } catch (ErrorException $e) {
+            DB::rollBack();
+            return Response::errorJson($e);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return Response::errorJson($e);
+        }
+    }
+
+    public function refreshToken (Request $request) {
+        try {
+            $data = $this->service->refreshToken($request->refresh_token);
             return Response::json($data);
         } catch (ErrorException $e) {
             DB::rollBack();

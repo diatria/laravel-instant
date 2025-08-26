@@ -7,9 +7,9 @@ class ErrorException extends \Exception
 
     public function __construct($message, $code, $data = null)
     {
-        $errorCode = (new Response)->translateCode($code)['http_code'];
+        $errorCode = (new Response())->translateCode($code)["http_code"];
         parent::__construct($message, $errorCode);
-        
+
         $this->errorCode = $code;
         $this->data = $data;
     }
@@ -19,17 +19,16 @@ class ErrorException extends \Exception
         return $this->errorCode ?: $this->getCode() ?: 500;
     }
 
-    public function getPayload() {
+    public function getPayload()
+    {
         return $this->data;
     }
 
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function getResponse($data = null)
     {
-        return Response::json(
-            $data,
-            $this->getMessage(),
-            $this->getErrorCode() ?? 500,
-            $this->getTrace()
-        );
+        return Response::json($data, $this->getMessage(), $this->getErrorCode() ?? 500, $this->getTrace());
     }
 }

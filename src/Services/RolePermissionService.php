@@ -2,8 +2,10 @@
 namespace Diatria\LaravelInstant\Services;
 
 use App\Models\RolePermission;
+use Illuminate\Support\Collection;
 use Diatria\LaravelInstant\Utils\Helper;
 use Diatria\LaravelInstant\Utils\Response;
+use Diatria\LaravelInstant\Models\Permission;
 use Diatria\LaravelInstant\Utils\ErrorException;
 use Diatria\LaravelInstant\Traits\InstantServiceTrait;
 use Diatria\LaravelInstant\Http\Responses\RolePermissionResponse;
@@ -101,5 +103,23 @@ class RolePermissionService
         } catch (ErrorException $e) {
             return Response::error($e->getErrorCode(), $e->getMessage());
         }
+    }
+
+    public function table(Collection $params){
+        $queries = collect($params->get('queries'))->map(function ($queryField) {
+            if (Helper::get($queryField, 'field') === 'permission') {
+                $permission = Helper::get($queryField, 'value');
+                $permissionIds = Permission::where('name', 'like', "%{$permission}%")->pluck('id');
+                return ['field' => 'permission_id', 'value' => $permissionIds ?? []];
+            }
+
+            return $queryField;
+        });
+
+        $params = collect([
+            "queries" => $queries->values()->toArray(),
+            "relations" => ["Role", "Permission"],
+        ]);
+        return $this->tableTrait($params);
     }
 }

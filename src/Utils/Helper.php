@@ -6,7 +6,9 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Helper
 {
@@ -86,7 +88,7 @@ class Helper
         return $th->result();
     }
 
-    static function getDomain(string $domain = null, string $default = null, array $config = ["port" => true])
+    static function getDomain(?string $domain = null, ?string $default = null, array $config = ["port" => true, "throw_error" => false])
     {
         $http_origin = isset($_SERVER["HTTP_ORIGIN"]) ? $_SERVER["HTTP_ORIGIN"] : null;
         $http_referer = isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : null;
@@ -98,13 +100,13 @@ class Helper
             $domain = $default;
         }
 
-        if (!$domain) {
+        if (!$domain && $config["throw_error"]) {
             throw new ErrorException("Tidak ada domain yang ditemukan", 500);
         }
 
         $parsedUrl = parse_url($domain);
 
-        $url = $parsedUrl["host"];
+        $url = $parsedUrl["host"] ?? $parsedUrl["path"];
         if ($config["port"] && isset($parsedUrl["port"])) {
             $url = $url . ":" . $parsedUrl["port"];
         }
@@ -149,11 +151,17 @@ class Helper
         return "{$modelClassName}:{$action}";
     }
 
-    static function getUserID()
+    static function getUserID(): int
     {
         if (config("laravel-instant.auth.driver", "sanctum") === "jwt") {
             $token = Token::info();
-            return $token["user_id"] ?? null;
+            if (!isset($token['uuid'])) {
+                throw new ErrorException('UUID tidak ditemukan didalam token!', 500);
+            }
+            $user = DB::table("users")
+                ->where("uuid", $token["uuid"] ?? null)
+                ->first();
+            return self::get($user, "id");
         } else {
             $user = auth("sanctum")->user();
             return $user ? $user->id : null;
@@ -177,6 +185,20 @@ class Helper
         return collect($model->getFillable())->contains("user_id");
     }
 
+    /**
+     * Make request template from Illuminate\Support\Facades\Http with cookies
+     */
+    static function http() {
+        $domain = self::getDomain(null, request()->domain ?? null, ["port" => false]);
+        return Http::withCookies(Helper::httpCookies(), $domain);
+    }
+
+    static function httpCookies() {
+        return [
+            strtolower(env("APP_TOKEN_NAME") . "_TOKEN") => Token::getToken()
+        ];
+    }
+
     static function log($message)
     {
         $message = is_array($message) ? json_encode($message) : $message;
@@ -192,6 +214,14 @@ class Helper
         $minutesLeadingZero = $minutes < 10 ? "0" . $minutes : $minutes;
 
         return $hoursLeadingZero . ":" . $minutesLeadingZero . ":00";
+    }
+
+    /**
+     * Menampilkan url storage_path dengan base path APP_URL
+     * @param string $path
+     */
+    static public function storageUrl (string $path) {
+        return config('app.url') . '/storage/' . $path;
     }
 
     static function throw($message): \Exception

@@ -1,6 +1,7 @@
 # Laravel Instant
 
 ## Tentang
+
 Laravel Instant dibuat untuk mempermudah dan mempercepat pengerjaan pembuatan module
 
 ## Instalasi
@@ -20,12 +21,27 @@ return [
 ];
 ```
 
-Tambahkan kode dibawan ini pada file `composer.json` di bagian `autoload > psr-4`
+Tambahkan kode dibawan ini pada file `composer.json` di bagian:
+- `autoload`
+- `repositories`
 
 ```json
+"require": {
+    "php": "^8.2",
+    "laravel/framework": "^11.9",
+    // ...
+    "diatria/laravel-instant": "*"
+},
 "autoload": {
   "psr-4": {
     "Diatria\\LaravelInstant\\": "vendor/diatria/laravel-instant/src"
   }
+},
+
+"repositories": {
+    "local": {
+        "type": "path",
+        "url": "./vendor/diatria/laravel-instant"
+    }
 },
 ```

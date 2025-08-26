@@ -8,13 +8,9 @@ class ThrowError
     protected $throw;
     protected $strict;
 
-    public function __construct(
-        $haystack,
-        $query,
-        $throw = null,
-        $strict = false
-    ) {
-        $this->haystack = collect($haystack)->toArray();
+    public function __construct($haystack, $query, $throw = null, $strict = false)
+    {
+        $this->haystack = json_decode(json_encode($haystack), true);
         $this->query = $query;
         $this->throw = $throw;
         $this->strict = $strict;
