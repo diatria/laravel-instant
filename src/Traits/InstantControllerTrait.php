@@ -36,7 +36,6 @@ trait InstantControllerTrait
         } catch (ErrorException $e) {
             return $e->getResponse();
         } catch (\Exception $e) {
-            return $e;
             return Response::getResponse($e);
         }
     }
