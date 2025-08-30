@@ -61,7 +61,7 @@ class UserService
 
     public function check()
     {
-        return Token::check();
+        return Token::verification();
     }
 
     public function getID()
@@ -102,9 +102,6 @@ class UserService
                 "email" => $user->email,
                 "role_id" => $user->role_id ?? null,
             ]);
-
-            // Set tooken cookies
-            Token::setToken($token["token"]);
 
             return [
                 ...$token,
