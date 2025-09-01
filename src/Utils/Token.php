@@ -55,9 +55,19 @@ class Token
         ];
     }
 
-    protected function getCookieName()
+    /**
+     * @param string $type memiliki value 'access' | 'refresh
+     * @return string
+     */
+    protected function getCookieName(?string $type = 'access')
     {
-        return $this->cookieName ?? env("LI_COOKIE_NAME");
+        if ($type === 'access') {
+            return $this->cookieName ?? env("LI_ACCESS_TOKEN_NAME");
+        }
+
+        if ($type == 'refresh') {
+            return $this->cookieName ?? env("LI_REFRESH_TOKEN_NAME");
+        }
     }
 
     protected function getSecretKey()
@@ -67,8 +77,7 @@ class Token
 
     protected function getToken(string $type = 'access')
     {
-        $suffix = $type === 'refresh' ? '_REFRESH_TOKEN' : '_ACCESS_TOKEN';
-        $cookieKey = strtolower($this->getCookieName() . $suffix);
+        $cookieKey = strtolower($this->getCookieName($type));
 
         if (isset($_COOKIE[$cookieKey])) {
             return $_COOKIE[$cookieKey];
@@ -85,13 +94,14 @@ class Token
     protected function logout()
     {
         // hapus access token cookie
-        setcookie(strtolower($this->getCookieName() . "_ACCESS_TOKEN"), '', time() - 3600, '/');
+        setcookie(strtolower($this->getCookieName('access')), '', time() - 3600, '/');
 
         // hapus refresh token cookie
-        setcookie(strtolower($this->getCookieName() . "_REFRESH_TOKEN"), '', time() - 3600, '/');
+        setcookie(strtolower($this->getCookieName('refresh')), '', time() - 3600, '/');
     }
 
-    protected function setConfig (array $config = []) {
+    protected function setConfig(array $config = [])
+    {
         if (isset($config['secret_key'])) {
             $this->secretKey = $config['secret_key'];
         }
@@ -108,10 +118,9 @@ class Token
      */
     protected function setToken(string $token, string $type = 'access', int $expired = 3600): bool
     {
-        $suffix = $type === 'refresh' ? '_REFRESH_TOKEN' : '_ACCESS_TOKEN';
         $domain = Helper::getDomain(config('laravel-instant.cookies.domain'), request()->domain ?? null, ["port" => false]);
 
-        return setcookie(strtolower($this->getCookieName() . $suffix), $token, [
+        return setcookie(strtolower($this->getCookieName($type)), $token, [
             "expires" => Carbon::now()->addSeconds($expired)->getTimestamp(),
             "path" => config("laravel-instant.cookies.path", "/"),
             "domain" => config("laravel-instant.cookies.domain", $domain),
@@ -139,7 +148,8 @@ class Token
         }
     }
 
-    public function __call($method, $args) {
+    public function __call($method, $args)
+    {
         if (method_exists($this, $method)) {
             return $this->$method(...$args);
         }
