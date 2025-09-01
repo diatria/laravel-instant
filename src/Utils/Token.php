@@ -19,6 +19,12 @@ class Token
      */
     private $cookieName;
 
+    // ! Deprecated
+    protected function check()
+    {
+        return $this->verification() ? true : false;
+    }
+
     protected function create($payload)
     {
         // Create Main Token
@@ -89,6 +95,12 @@ class Token
         }
 
         throw new \ErrorException("Refresh Token Not Found!", 401);
+    }
+
+    // ! Deprecated
+    protected function info()
+    {
+        return Helper::toArray($this->verification());
     }
 
     protected function logout()
