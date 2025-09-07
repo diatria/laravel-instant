@@ -19,12 +19,6 @@ class Token
      */
     private $cookieName;
 
-    // ! Deprecated
-    protected function check()
-    {
-        return $this->verification() ? true : false;
-    }
-
     protected function create($payload)
     {
         // Create Main Token
@@ -61,19 +55,9 @@ class Token
         ];
     }
 
-    /**
-     * @param string $type memiliki value 'access' | 'refresh
-     * @return string
-     */
-    protected function getCookieName(?string $type = 'access')
+    protected function getCookieName()
     {
-        if ($type === 'access') {
-            return $this->cookieName ?? env("LI_ACCESS_TOKEN_NAME");
-        }
-
-        if ($type == 'refresh') {
-            return $this->cookieName ?? env("LI_REFRESH_TOKEN_NAME");
-        }
+        return $this->cookieName ?? env("LI_COOKIE_NAME");
     }
 
     protected function getSecretKey()
@@ -83,7 +67,8 @@ class Token
 
     protected function getToken(string $type = 'access')
     {
-        $cookieKey = strtolower($this->getCookieName($type));
+        $suffix = $type === 'refresh' ? '_REFRESH_TOKEN' : '_ACCESS_TOKEN';
+        $cookieKey = strtolower($this->getCookieName() . $suffix);
 
         if (isset($_COOKIE[$cookieKey])) {
             return $_COOKIE[$cookieKey];
@@ -97,19 +82,13 @@ class Token
         throw new \ErrorException("Refresh Token Not Found!", 401);
     }
 
-    // ! Deprecated
-    protected function info()
-    {
-        return Helper::toArray($this->verification());
-    }
-
     protected function logout()
     {
         // hapus access token cookie
-        setcookie(strtolower($this->getCookieName('access')), '', time() - 3600, '/');
+        setcookie(strtolower($this->getCookieName() . "_ACCESS_TOKEN"), '', time() - 3600, '/');
 
         // hapus refresh token cookie
-        setcookie(strtolower($this->getCookieName('refresh')), '', time() - 3600, '/');
+        setcookie(strtolower($this->getCookieName() . "_REFRESH_TOKEN"), '', time() - 3600, '/');
     }
 
     protected function setConfig(array $config = [])
@@ -130,9 +109,10 @@ class Token
      */
     protected function setToken(string $token, string $type = 'access', int $expired = 3600): bool
     {
+        $suffix = $type === 'refresh' ? '_REFRESH_TOKEN' : '_ACCESS_TOKEN';
         $domain = Helper::getDomain(config('laravel-instant.cookies.domain'), request()->domain ?? null, ["port" => false]);
 
-        return setcookie(strtolower($this->getCookieName($type)), $token, [
+        return setcookie(strtolower($this->getCookieName() . $suffix), $token, [
             "expires" => Carbon::now()->addSeconds($expired)->getTimestamp(),
             "path" => config("laravel-instant.cookies.path", "/"),
             "domain" => config("laravel-instant.cookies.domain", $domain),
@@ -155,7 +135,7 @@ class Token
         } catch (ExpiredException $e) {
             $decoded = JWT::decode($this->getToken('refresh'), new Key($this->getSecretKey(), "HS256"));
             if ($decoded) {
-                return $this->create($decoded);
+                return $this->create(Helper::toArray($decoded));
             }
         }
     }
