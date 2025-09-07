@@ -41,6 +41,8 @@ class Permission
             }
 
             return $haveAccess;
+        } catch (SignatureInvalidException $e) {
+            throw new ErrorException($e->getMessage(), $e->getCode());
         } catch (ErrorException $e) {
             throw new ErrorException($e->getMessage(), $e->getCode());
         } catch (\Exception $e) {
