@@ -145,7 +145,9 @@ trait InstantControllerTrait
             $permission = config("laravel-instant.class_permission", \Diatria\LaravelInstant\Utils\Permission::class);
             (new $permission($this->permission ?? null))->can("delete");
 
-            $removeData = $this->service->remove($request->id);
+            $ids = $request->input('id');
+
+            $removeData = $this->service->remove($ids);
             DB::commit();
             return Response::json($removeData, __("application.deleted"));
         } catch (ErrorException $e) {
