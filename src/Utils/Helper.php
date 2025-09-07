@@ -5,10 +5,11 @@ namespace Diatria\LaravelInstant\Utils;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
+use Diatria\LaravelInstant\Utils\Token;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 
 class Helper
 {
@@ -155,11 +156,11 @@ class Helper
     {
         if (config("laravel-instant.auth.driver", "sanctum") === "jwt") {
             $token = Token::verification();
-            if (!isset($token['uuid'])) {
+            if (!Helper::get($token, 'uuid')) {
                 throw new ErrorException('UUID tidak ditemukan didalam token!', 500);
             }
             $user = DB::table("users")
-                ->where("uuid", $token["uuid"] ?? null)
+                ->where("uuid", Helper::get($token, 'uuid') ?? null)
                 ->first();
             return self::get($user, "id");
         } else {
@@ -188,12 +189,14 @@ class Helper
     /**
      * Make request template from Illuminate\Support\Facades\Http with cookies
      */
-    static function http() {
+    static function http()
+    {
         $domain = self::getDomain(null, request()->domain ?? null, ["port" => false]);
         return Http::withCookies(Helper::httpCookies(), $domain);
     }
 
-    static function httpCookies() {
+    static function httpCookies()
+    {
         return [
             strtolower(env("APP_TOKEN_NAME") . "_TOKEN") => Token::getToken()
         ];
@@ -220,7 +223,8 @@ class Helper
      * Menampilkan url storage_path dengan base path APP_URL
      * @param string $path
      */
-    static public function storageUrl (string $path) {
+    static public function storageUrl(string $path)
+    {
         return config('app.url') . '/storage/' . $path;
     }
 
