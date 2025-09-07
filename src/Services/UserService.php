@@ -66,10 +66,10 @@ class UserService
 
     public function getID()
     {
-        if (Token::check()) {
-            $token = Token::info();
+        $token = Token::verification();
+        if ($token) {
             if (collect($token)->has('uuid')) {
-                $user = $this->model->where("uuid", $token["uuid"])->first();
+                $user = $this->model->where("uuid", Helper::get($token, "uuid"))->first();
                 return $user->id;
             }
         }
