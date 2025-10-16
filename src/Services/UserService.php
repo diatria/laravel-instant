@@ -70,7 +70,7 @@ class UserService
             $token = Token::info();
             if (collect($token)->has('uuid')) {
                 $user = $this->model->where("uuid", $token["uuid"])->first();
-                return $user->id;
+                return $user ? $user->id : null;
             }
         }
         return null;
