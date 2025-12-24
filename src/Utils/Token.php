@@ -24,7 +24,7 @@ class Token
         // Create Main Token
         $accessToken = JWT::encode(
             [
-                "iss" => env("APP_URL"), // Issuer (pihak yang mengeluarkan token)
+                "iss" => config("laravel-instant.app.name", "LI"), // Issuer (pihak yang mengeluarkan token)
                 "exp" => Carbon::now()->addSeconds(config("laravel-instant.auth.token_expires", 3600))->getTimestamp(), // Expiration time (waktu kadaluarsa token)
                 "iat" => Carbon::now()->getTimestamp(), // Issued at time (waktu token dikeluarkan)
                 ...$payload,
@@ -36,7 +36,7 @@ class Token
         // Create Refresh Token
         $refreshToken = JWT::encode(
             [
-                "iss" => env("APP_URL"), // Issuer (pihak yang mengeluarkan token)
+                "iss" => config("laravel-instant.app.name", "LI"), // Issuer (pihak yang mengeluarkan token)
                 "exp" => Carbon::now()->addSeconds(config("laravel-instant.auth.token_refresh_expires", 21600))->getTimestamp(), // Expiration time (waktu kadaluarsa token)
                 "iat" => Carbon::now()->getTimestamp(), // Issued at time (waktu token dikeluarkan)
                 ...$payload,
@@ -57,12 +57,12 @@ class Token
 
     protected function getCookieName()
     {
-        return $this->cookieName ?? env("LI_COOKIE_NAME");
+        return $this->cookieName ?? config("laravel-instant.cookies.name", 'LI');
     }
 
     protected function getSecretKey()
     {
-        return $this->secretKey ?? sha1(env('LI_SECRET_KEY'));
+        return $this->secretKey ?? sha1(config("laravel-instant.app.secret_key"));
     }
 
     protected function getToken(string $type = 'access')
