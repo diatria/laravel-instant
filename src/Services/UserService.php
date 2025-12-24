@@ -61,15 +61,15 @@ class UserService
 
     public function check()
     {
-        return Token::check();
+        return Token::verification();
     }
 
     public function getID()
     {
-        if (Token::check()) {
-            $token = Token::info();
+        $token = Token::verification();
+        if ($token) {
             if (collect($token)->has('uuid')) {
-                $user = $this->model->where("uuid", $token["uuid"])->first();
+                $user = $this->model->where("uuid", Helper::get($token, "uuid"))->first();
                 return $user ? $user->id : null;
             }
         }
@@ -102,9 +102,6 @@ class UserService
                 "email" => $user->email,
                 "role_id" => $user->role_id ?? null,
             ]);
-
-            // Set tooken cookies
-            Token::setToken($token["token"]);
 
             return [
                 ...$token,

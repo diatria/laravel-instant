@@ -20,8 +20,8 @@ class Permission
 
             $this->action = $action;
 
-            $tokenInfo = Token::info();
-            $user = User::where("uuid", $tokenInfo["uuid"])->first();
+            $tokenInfo = Token::verification();
+            $user = User::where("uuid", Helper::get($tokenInfo, 'uuid'))->first();
 
             if (!$user) {
                 throw new ErrorException("Unauthorized", 401);
@@ -41,6 +41,8 @@ class Permission
             }
 
             return $haveAccess;
+        } catch (SignatureInvalidException $e) {
+            throw new ErrorException($e->getMessage(), $e->getCode());
         } catch (ErrorException $e) {
             throw new ErrorException($e->getMessage(), $e->getCode());
         } catch (\Exception $e) {
