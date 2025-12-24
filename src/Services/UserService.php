@@ -70,7 +70,7 @@ class UserService
         if ($token) {
             if (collect($token)->has('uuid')) {
                 $user = $this->model->where("uuid", Helper::get($token, "uuid"))->first();
-                return $user->id;
+                return $user ? $user->id : null;
             }
         }
         return null;

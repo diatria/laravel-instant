@@ -19,6 +19,11 @@ class Token
      */
     private $cookieName;
 
+    function __construct()
+    {
+        $this->cookieName = env("LI_COOKIE_NAME", "laravel-instant");
+    }
+
     protected function create($payload)
     {
         // Create Main Token
@@ -46,12 +51,20 @@ class Token
         );
 
         // Set main token to cookies
-        $this->setToken($accessToken, 'access', config("laravel-instant.cookies.expires", 3600));
-        $this->setToken($refreshToken, 'refresh', config("laravel-instant.auth.token_refresh_expires", 21600));
+        $this->setToken(
+            $accessToken,
+            "access",
+            config("laravel-instant.cookies.expires", 3600),
+        );
+        $this->setToken(
+            $refreshToken,
+            "refresh",
+            config("laravel-instant.auth.token_refresh_expires", 21600),
+        );
 
         return [
-            'access_token' => $accessToken,
-            'refresh_token' => $refreshToken,
+            "access_token" => $accessToken,
+            "refresh_token" => $refreshToken,
         ];
     }
 
@@ -65,40 +78,54 @@ class Token
         return $this->secretKey ?? sha1(config("laravel-instant.app.secret_key"));
     }
 
-    protected function getToken(string $type = 'access')
+    protected function getAccessToken()
     {
-        $suffix = $type === 'refresh' ? '_REFRESH_TOKEN' : '_ACCESS_TOKEN';
-        $cookieKey = strtolower($this->getCookieName() . $suffix);
 
-        if (isset($_COOKIE[$cookieKey])) {
-            return $_COOKIE[$cookieKey];
-        }
-
-        if ($type === 'access') {
+        if (isset($_COOKIE[$this->getAccessTokenName()])) {
+            return $_COOKIE[$this->getAccessTokenName()];
+        } else {
             // Access token masih bisa fallback ke bearer
-            return request()->bearerToken() ?? throw new \ErrorException("Access Token Not Found!", 401);
+            return request()->bearerToken() ??
+                throw new \ErrorException("Access Token Not Found!", 401);
         }
+    }
 
-        throw new \ErrorException("Refresh Token Not Found!", 401);
+    protected function getRefreshToken()
+    {
+        if (isset($_COOKIE[$this->getRefreshTokenName()])) {
+            return $_COOKIE[$this->getRefreshTokenName()];
+        } else {
+            throw new \ErrorException("Refresh Token Not Found!", 401);
+        }
     }
 
     protected function logout()
     {
         // hapus access token cookie
-        setcookie(strtolower($this->getCookieName() . "_ACCESS_TOKEN"), '', time() - 3600, '/');
+        setcookie(
+            $this->getAccessTokenName(),
+            "",
+            time() - 3600,
+            "/",
+        );
 
         // hapus refresh token cookie
-        setcookie(strtolower($this->getCookieName() . "_REFRESH_TOKEN"), '', time() - 3600, '/');
+        setcookie(
+            $this->getRefreshTokenName(),
+            "",
+            time() - 3600,
+            "/",
+        );
     }
 
     protected function setConfig(array $config = [])
     {
-        if (isset($config['secret_key'])) {
-            $this->secretKey = $config['secret_key'];
+        if (isset($config["secret_key"])) {
+            $this->secretKey = $config["secret_key"];
         }
 
-        if (isset($config['cookie_name'])) {
-            $this->cookieName = $config['cookie_name'];
+        if (isset($config["cookie_name"])) {
+            $this->cookieName = $config["cookie_name"];
         }
 
         return $this;
@@ -107,12 +134,19 @@ class Token
     /**
      * Melakukan set token ke cookies
      */
-    protected function setToken(string $token, string $type = 'access', int $expired = 3600): bool
-    {
-        $suffix = $type === 'refresh' ? '_REFRESH_TOKEN' : '_ACCESS_TOKEN';
-        $domain = Helper::getDomain(config('laravel-instant.cookies.domain'), request()->domain ?? null, ["port" => false]);
+    protected function setToken(
+        string $token,
+        string $type = "access",
+        int $expired = 3600,
+    ): bool {
+        $cookieName = $type === "refresh" ? $this->getRefreshTokenName() : $this->getAccessTokenName();
+        $domain = Helper::getDomain(
+            config("laravel-instant.cookies.domain"),
+            request()->domain ?? null,
+            ["port" => false],
+        );
 
-        return setcookie(strtolower($this->getCookieName() . $suffix), $token, [
+        return setcookie($cookieName, $token, [
             "expires" => Carbon::now()->addSeconds($expired)->getTimestamp(),
             "path" => config("laravel-instant.cookies.path", "/"),
             "domain" => config("laravel-instant.cookies.domain", $domain),
@@ -122,21 +156,44 @@ class Token
         ]);
     }
 
-    protected function verification(?string $token = null)
+    /**
+     * Verify token
+     *
+     * @param string|null $token
+     * @return array
+     */
+    protected function verification(?string $token = null): array
     {
         try {
             if ($token) {
-                $decoded = JWT::decode($token, new Key($this->getSecretKey(), "HS256"));
-                return isset($decoded) ? $decoded : null;
+                $decoded = JWT::decode(
+                    $token,
+                    new Key($this->getSecretKey(), "HS256"),
+                );
+                return Helper::toArray($decoded) ?? [];
             }
 
-            $decoded = JWT::decode($this->getToken(), new Key($this->getSecretKey(), "HS256"));
-            return isset($decoded) ? $decoded : null;
+            $decoded = JWT::decode(
+                $this->getAccessToken(),
+                new Key($this->getSecretKey(), "HS256"),
+            );
+            return Helper::toArray($decoded) ?? [];
         } catch (ExpiredException $e) {
-            $decoded = JWT::decode($this->getToken('refresh'), new Key($this->getSecretKey(), "HS256"));
-            if ($decoded) {
-                return $this->create(Helper::toArray($decoded));
+            try {
+                $decoded = JWT::decode(
+                    $this->getRefreshToken(),
+                    new Key($this->getSecretKey(), "HS256"),
+                );
+                if ($decoded) {
+                    return $this->create(Helper::toArray($decoded));
+                }
+            } catch (ErrorException $e) {
+                throw new ErrorException("Token verification failed", 401);
             }
+
+            throw new ErrorException("Token has expired", 401);
+        } catch (\Exception $e) {
+            throw new ErrorException("Token verification failed", 401);
         }
     }
 
@@ -150,7 +207,7 @@ class Token
 
     public static function __callStatic($method, $args)
     {
-        $instance = new static;
+        $instance = new static();
         return $instance->$method(...$args);
     }
 }
