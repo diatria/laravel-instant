@@ -3,211 +3,297 @@
 namespace Diatria\LaravelInstant\Utils;
 
 use Carbon\Carbon;
+use Firebase\JWT\ExpiredException;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
-use Firebase\JWT\ExpiredException;
 
 class Token
 {
     /**
-     * Atur secret key untuk mengamankan jwt token
+     * Nama cookie untuk menyimpan access token.
      */
-    private $secretKey;
+    private string $accessTokenName;
 
     /**
-     * Atur untuk menamai cookies
+     * Nama cookie untuk menyimpan refresh token.
      */
-    private $cookieName;
+    private string $refreshTokenName;
 
-    function __construct()
+    /**
+     * Durasi kedaluwarsa access token dalam detik.
+     * 3600 → 1 jam
+     */
+    private int $accessTokenExpires;
+
+    /**
+     * Durasi kedaluwarsa refresh token dalam detik.
+     * 21600 → 6 jam
+     */
+    private int $refreshTokenExpires;
+
+    /**
+     * Domain tempat cookie akan disimpan.
+     * Contoh: .example.com
+     */
+    private string $domain;
+
+    /**
+     * Issuer (iss) pada JWT.
+     * Mengidentifikasi aplikasi / auth server penerbit token
+     */
+    private string $issuer;
+
+    /**
+     * Secret key untuk signing dan verifikasi JWT.
+     */
+    private string $secretKey;
+
+    /**
+     * Algoritma kriptografi JWT.
+     * RS256 | HS256
+     */
+    private $algorithm;
+
+    /**
+     * Whitelist of methods allowed to be invoked via magic callers
+     *
+     * @var string[]
+     */
+    private static $allowedCalls = ['create', 'verification', 'logout'];
+
+    public function __construct()
     {
-        $this->cookieName = env("LI_COOKIE_NAME", "laravel-instant");
+        $this->authConfig();
     }
 
-    protected function create($payload)
+    /**
+     * Load auth config
+     *
+     * @return void
+     */
+    public function authConfig()
     {
-        // Create Main Token
-        $accessToken = JWT::encode(
-            [
-                "iss" => config("laravel-instant.app.name", "LI"), // Issuer (pihak yang mengeluarkan token)
-                "exp" => Carbon::now()->addSeconds(config("laravel-instant.auth.token_expires", 3600))->getTimestamp(), // Expiration time (waktu kadaluarsa token)
-                "iat" => Carbon::now()->getTimestamp(), // Issued at time (waktu token dikeluarkan)
-                ...$payload,
-            ],
-            $this->getSecretKey(),
-            "HS256",
-        );
+        $this->accessTokenName = config('laravel-instant.auth.access_token_name', 'laravel_instant');
+        $this->refreshTokenName = config('laravel-instant.auth.refresh_token_name', 'laravel_instant');
+        $this->accessTokenExpires = config('laravel-instant.auth.access_token_expires', 3600);
+        $this->refreshTokenExpires = config('laravel-instant.auth.refresh_token_expires', 21600);
+        $this->domain = config('laravel-instant.cookies.domain');
+        $this->issuer = config('app.name', 'laravel_instant');
+        $this->secretKey = config('laravel-instant.auth.secret_key');
+        $this->algorithm = config('laravel-instant.auth.algorithm', 'HS256');
+    }
 
-        // Create Refresh Token
-        $refreshToken = JWT::encode(
-            [
-                "iss" => config("laravel-instant.app.name", "LI"), // Issuer (pihak yang mengeluarkan token)
-                "exp" => Carbon::now()->addSeconds(config("laravel-instant.auth.token_refresh_expires", 21600))->getTimestamp(), // Expiration time (waktu kadaluarsa token)
-                "iat" => Carbon::now()->getTimestamp(), // Issued at time (waktu token dikeluarkan)
-                ...$payload,
-            ],
-            $this->getSecretKey(),
-            "HS256",
-        );
-
-        // Set main token to cookies
-        $this->setToken(
-            $accessToken,
-            "access",
-            config("laravel-instant.cookies.expires", 3600),
-        );
-        $this->setToken(
-            $refreshToken,
-            "refresh",
-            config("laravel-instant.auth.token_refresh_expires", 21600),
-        );
-
+    public function create(array $payload)
+    {
         return [
-            "access_token" => $accessToken,
-            "refresh_token" => $refreshToken,
+            'access_token' => $this->accessToken($payload),
+            'refresh_token' => $this->refreshToken($payload),
         ];
     }
 
-    protected function getCookieName()
+    /**
+     * Create access token
+     *
+     * @param  array  $payload  isi dari data yang di enkripsi
+     */
+    protected function generateAccessToken(array $payload)
     {
-        return $this->cookieName ?? config("laravel-instant.cookies.name", 'LI');
+        $token = JWT::encode(
+            [
+                'iss' => $this->issuer, // Issuer (pihak yang mengeluarkan token)
+                'exp' => Carbon::now()->addSeconds($this->accessTokenExpires)->getTimestamp(), // Expiration time (waktu kadaluarsa token)
+                'iat' => Carbon::now()->getTimestamp(), // Issued at time (waktu token dikeluarkan)
+                ...$payload,
+            ],
+            $this->secretKey,
+            $this->algorithm,
+        );
+
+        /**
+         * Melakukan set cookie
+         */
+        $this->setTokenCookie($token, $this->accessTokenName, $this->accessTokenExpires);
+
+        return $token;
     }
 
-    protected function getSecretKey()
+    /**
+     * Create refresh token
+     *
+     * @param  array  $payload  isi dari data yang di enkripsi
+     */
+    protected function generateRefreshToken(array $payload)
     {
-        return $this->secretKey ?? sha1(config("laravel-instant.app.secret_key"));
+        $token = JWT::encode(
+            [
+                'iss' => $this->issuer, // Issuer (pihak yang mengeluarkan token)
+                'exp' => Carbon::now()->addSeconds($this->refreshTokenExpires)->getTimestamp(), // Expiration time (waktu kadaluarsa token)
+                'iat' => Carbon::now()->getTimestamp(), // Issued at time (waktu token dikeluarkan)
+                ...$payload,
+            ],
+            $this->secretKey,
+            $this->algorithm,
+        );
+
+        /**
+         * Melakukan set cookie
+         */
+        $this->setTokenCookie($token, $this->refreshTokenName, $this->refreshTokenExpires);
+
+        return $token;
     }
 
+    /**
+     * Get access token from cookies or bearer token
+     *
+     * @return string
+     */
     protected function getAccessToken()
     {
-
-        if (isset($_COOKIE[$this->getAccessTokenName()])) {
-            return $_COOKIE[$this->getAccessTokenName()];
-        } else {
-            // Access token masih bisa fallback ke bearer
-            return request()->bearerToken() ??
-                throw new \ErrorException("Access Token Not Found!", 401);
+        // Return cookies token
+        if (isset($_COOKIE[$this->accessTokenName])) {
+            return $_COOKIE[$this->accessTokenName];
         }
+
+        // Return default ke bearer token
+        $token = request()->bearerToken();
+        if (! $token) {
+            throw new \ErrorException('Access Token Not Found!', 401);
+        }
+
+        return $token;
     }
 
+    /**
+     * Get refresh token from cookies
+     *
+     * @return string
+     */
     protected function getRefreshToken()
     {
-        if (isset($_COOKIE[$this->getRefreshTokenName()])) {
-            return $_COOKIE[$this->getRefreshTokenName()];
+        if (isset($_COOKIE[$this->refreshTokenName])) {
+            return $_COOKIE[$this->refreshTokenName];
         } else {
-            throw new \ErrorException("Refresh Token Not Found!", 401);
+            throw new \ErrorException('Refresh Token Not Found!', 401);
         }
     }
 
-    protected function logout()
+    /**
+     * Logout user by deleting token cookies
+     *
+     * @return void
+     */
+    public function logout()
     {
         // hapus access token cookie
         setcookie(
-            $this->getAccessTokenName(),
-            "",
+            $this->accessTokenName,
+            '',
             time() - 3600,
-            "/",
+            '/',
         );
 
         // hapus refresh token cookie
         setcookie(
-            $this->getRefreshTokenName(),
-            "",
+            $this->refreshTokenName,
+            '',
             time() - 3600,
-            "/",
+            '/',
         );
-    }
-
-    protected function setConfig(array $config = [])
-    {
-        if (isset($config["secret_key"])) {
-            $this->secretKey = $config["secret_key"];
-        }
-
-        if (isset($config["cookie_name"])) {
-            $this->cookieName = $config["cookie_name"];
-        }
-
-        return $this;
     }
 
     /**
      * Melakukan set token ke cookies
      */
-    protected function setToken(
-        string $token,
-        string $type = "access",
-        int $expired = 3600,
-    ): bool {
-        $cookieName = $type === "refresh" ? $this->getRefreshTokenName() : $this->getAccessTokenName();
-        $domain = Helper::getDomain(
-            config("laravel-instant.cookies.domain"),
-            request()->domain ?? null,
-            ["port" => false],
-        );
+    protected function setTokenCookie(string $token, string $tokenName, int $expired = 3600): bool
+    {
+        $domain = Helper::getDomain($this->domain, request()->getHost() ?? null, ['port' => false]);
 
-        return setcookie($cookieName, $token, [
-            "expires" => Carbon::now()->addSeconds($expired)->getTimestamp(),
-            "path" => config("laravel-instant.cookies.path", "/"),
-            "domain" => config("laravel-instant.cookies.domain", $domain),
-            "secure" => config("laravel-instant.cookies.secure", false),
-            "httponly" => config("laravel-instant.cookies.httponly", true),
-            "samesite" => config("laravel-instant.cookies.samesite", "none"),
+        return setcookie($tokenName, $token, [
+            'expires' => Carbon::now()->addSeconds($expired)->getTimestamp(),
+            'path' => config('laravel-instant.cookies.path', '/'),
+            'domain' => config('laravel-instant.cookies.domain', $domain),
+            'secure' => config('laravel-instant.cookies.secure', true),
+            'httponly' => config('laravel-instant.cookies.httponly', true),
+            'samesite' => config('laravel-instant.cookies.samesite', 'none'),
         ]);
     }
 
     /**
-     * Verify token
+     * Verifikasi token
      *
-     * @param string|null $token
      * @return array
      */
-    protected function verification(?string $token = null): array
+    public function verification(?string $token = null)
     {
         try {
+            // Verifikasi string token
             if ($token) {
                 $decoded = JWT::decode(
                     $token,
-                    new Key($this->getSecretKey(), "HS256"),
+                    new Key($this->secretKey, $this->algorithm),
                 );
+
                 return Helper::toArray($decoded) ?? [];
             }
 
+            // Verifikasi token dari cookies
             $decoded = JWT::decode(
                 $this->getAccessToken(),
-                new Key($this->getSecretKey(), "HS256"),
+                new Key($this->secretKey, $this->algorithm),
             );
+
             return Helper::toArray($decoded) ?? [];
         } catch (ExpiredException $e) {
             try {
                 $decoded = JWT::decode(
                     $this->getRefreshToken(),
-                    new Key($this->getSecretKey(), "HS256"),
+                    new Key($this->secretKey, $this->algorithm),
                 );
                 if ($decoded) {
                     return $this->create(Helper::toArray($decoded));
                 }
             } catch (ErrorException $e) {
-                throw new ErrorException("Token verification failed", 401);
+                throw new ErrorException('Token verification failed, can`t find Access Token or Refresh Token', 401);
             }
 
-            throw new ErrorException("Token has expired", 401);
+            throw new ErrorException('Token has expired', 401);
         } catch (\Exception $e) {
-            throw new ErrorException("Token verification failed", 401);
+            throw new ErrorException('Token verification failed', 401);
         }
     }
 
+    /**
+     * Handle dynamic method calls into the class.
+     *
+     * @param  string  $method
+     * @param  array  $args
+     * @return mixed
+     */
     public function __call($method, $args)
     {
-        if (method_exists($this, $method)) {
+        if (in_array($method, self::$allowedCalls, true) && method_exists($this, $method)) {
             return $this->$method(...$args);
         }
         throw new \BadMethodCallException("Method {$method} tidak ditemukan.");
     }
 
+    /**
+     * Handle dynamic static method calls into the class.
+     *
+     * @param  string  $method
+     * @param  array  $args
+     * @return mixed
+     */
     public static function __callStatic($method, $args)
     {
-        $instance = new static();
-        return $instance->$method(...$args);
+        if (in_array($method, self::$allowedCalls, true)) {
+            $instance = new static;
+            if (method_exists($instance, $method)) {
+                return $instance->$method(...$args);
+            }
+        }
+
+        throw new \BadMethodCallException("Method {$method} tidak ditemukan.");
     }
 }
