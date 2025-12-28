@@ -35,7 +35,7 @@ class Token
      * Domain tempat cookie akan disimpan.
      * Contoh: .example.com
      */
-    private string $domain;
+    private ?string $domain = null;
 
     /**
      * Issuer (iss) pada JWT.
@@ -46,7 +46,7 @@ class Token
     /**
      * Secret key untuk signing dan verifikasi JWT.
      */
-    private string $secretKey;
+    private ?string $secretKey = null;
 
     /**
      * Algoritma kriptografi JWT.
@@ -77,17 +77,18 @@ class Token
         $this->refreshTokenName = config('laravel-instant.auth.refresh_token_name', 'laravel_instant');
         $this->accessTokenExpires = config('laravel-instant.auth.access_token_expires', 3600);
         $this->refreshTokenExpires = config('laravel-instant.auth.refresh_token_expires', 21600);
-        $this->domain = config('laravel-instant.cookies.domain');
         $this->issuer = config('app.name', 'laravel_instant');
         $this->secretKey = config('laravel-instant.auth.secret_key');
         $this->algorithm = config('laravel-instant.auth.algorithm', 'HS256');
+
+        return $this;
     }
 
     public function create(array $payload)
     {
         return [
-            'access_token' => $this->accessToken($payload),
-            'refresh_token' => $this->refreshToken($payload),
+            'access_token' => $this->generateAccessToken($payload),
+            'refresh_token' => $this->generateRefreshToken($payload),
         ];
     }
 
@@ -200,6 +201,13 @@ class Token
             time() - 3600,
             '/',
         );
+    }
+
+    public function setSecretKey(string $secretKey)
+    {
+        $this->secretKey = $secretKey;
+
+        return $this;
     }
 
     /**
