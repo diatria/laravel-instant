@@ -25,7 +25,7 @@ class Permission
 
             $this->action = $action;
 
-            $tokenInfo = new Token()->verification();
+            $tokenInfo = Token::verification();
             $user = User::where('uuid', Helper::get($tokenInfo, 'uuid'))->first();
 
             if (! $user) {

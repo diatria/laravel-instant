@@ -7,6 +7,19 @@ use Firebase\JWT\ExpiredException;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
+/**
+ * Class Token
+ *
+ * Static helper annotations to improve IDE autocompletion when calling
+ * methods via Token::method(). Only public instance methods can be
+ * proxied statically at runtime.
+ *
+ * @method static \Diatria\LaravelInstant\Utils\Token authConfig()
+ * @method static array create(array $payload)
+ * @method static array|mixed verification(?string $token = null)
+ * @method static void logout()
+ * @method static \Diatria\LaravelInstant\Utils\Token setSecretKey(string $secretKey)
+ */
 class Token
 {
     /**
@@ -54,13 +67,6 @@ class Token
      */
     private $algorithm;
 
-    /**
-     * Whitelist of methods allowed to be invoked via magic callers
-     *
-     * @var string[]
-     */
-    private static $allowedCalls = ['create', 'verification', 'logout'];
-
     public function __construct()
     {
         $this->authConfig();
@@ -71,7 +77,7 @@ class Token
      *
      * @return void
      */
-    public function authConfig()
+    protected function authConfig()
     {
         $this->accessTokenName = config('laravel-instant.auth.access_token_name', 'laravel_instant');
         $this->refreshTokenName = config('laravel-instant.auth.refresh_token_name', 'laravel_instant');
@@ -84,7 +90,7 @@ class Token
         return $this;
     }
 
-    public function create(array $payload)
+    protected function create(array $payload)
     {
         return [
             'access_token' => $this->generateAccessToken($payload),
@@ -184,7 +190,7 @@ class Token
      *
      * @return void
      */
-    public function logout()
+    protected function logout()
     {
         // hapus access token cookie
         setcookie(
@@ -203,7 +209,7 @@ class Token
         );
     }
 
-    public function setSecretKey(string $secretKey)
+    protected function setSecretKey(string $secretKey)
     {
         $this->secretKey = $secretKey;
 
@@ -232,7 +238,7 @@ class Token
      *
      * @return array
      */
-    public function verification(?string $token = null)
+    protected function verification(?string $token = null)
     {
         try {
             // Verifikasi string token
@@ -280,9 +286,10 @@ class Token
      */
     public function __call($method, $args)
     {
-        if (in_array($method, self::$allowedCalls, true) && method_exists($this, $method)) {
+        if (method_exists($this, $method) && is_callable([$this, $method])) {
             return $this->$method(...$args);
         }
+
         throw new \BadMethodCallException("Method {$method} tidak ditemukan.");
     }
 
@@ -295,11 +302,9 @@ class Token
      */
     public static function __callStatic($method, $args)
     {
-        if (in_array($method, self::$allowedCalls, true)) {
-            $instance = new static;
-            if (method_exists($instance, $method)) {
-                return $instance->$method(...$args);
-            }
+        $instance = new static;
+        if (method_exists($instance, $method) && is_callable([$instance, $method])) {
+            return $instance->$method(...$args);
         }
 
         throw new \BadMethodCallException("Method {$method} tidak ditemukan.");
