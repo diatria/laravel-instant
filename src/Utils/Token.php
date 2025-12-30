@@ -77,7 +77,7 @@ class Token
      *
      * @return void
      */
-    protected function authConfig()
+    public function authConfig()
     {
         $this->accessTokenName = config('laravel-instant.auth.access_token_name', 'laravel_instant');
         $this->refreshTokenName = config('laravel-instant.auth.refresh_token_name', 'laravel_instant');
@@ -86,11 +86,12 @@ class Token
         $this->issuer = config('app.name', 'laravel_instant');
         $this->secretKey = config('laravel-instant.auth.secret_key');
         $this->algorithm = config('laravel-instant.auth.algorithm', 'HS256');
+        $this->domain = config('laravel-instant.cookies.domain', '');
 
         return $this;
     }
 
-    protected function create(array $payload)
+    public function create(array $payload)
     {
         return [
             'access_token' => $this->generateAccessToken($payload),
@@ -103,7 +104,7 @@ class Token
      *
      * @param  array  $payload  isi dari data yang di enkripsi
      */
-    protected function generateAccessToken(array $payload)
+    public function generateAccessToken(array $payload)
     {
         $token = JWT::encode(
             [
@@ -129,7 +130,7 @@ class Token
      *
      * @param  array  $payload  isi dari data yang di enkripsi
      */
-    protected function generateRefreshToken(array $payload)
+    public function generateRefreshToken(array $payload)
     {
         $token = JWT::encode(
             [
@@ -155,7 +156,7 @@ class Token
      *
      * @return string
      */
-    protected function getAccessToken()
+    public function getAccessToken()
     {
         // Return cookies token
         if (isset($_COOKIE[$this->accessTokenName])) {
@@ -176,7 +177,7 @@ class Token
      *
      * @return string
      */
-    protected function getRefreshToken()
+    public function getRefreshToken()
     {
         if (isset($_COOKIE[$this->refreshTokenName])) {
             return $_COOKIE[$this->refreshTokenName];
@@ -190,7 +191,7 @@ class Token
      *
      * @return void
      */
-    protected function logout()
+    public function logout()
     {
         // hapus access token cookie
         setcookie(
@@ -198,6 +199,9 @@ class Token
             '',
             time() - 3600,
             '/',
+            $this->domain,
+            config('laravel-instant.cookies.secure', true),
+            config('laravel-instant.cookies.httponly', true)
         );
 
         // hapus refresh token cookie
@@ -206,10 +210,20 @@ class Token
             '',
             time() - 3600,
             '/',
+            $this->domain,
+            config('laravel-instant.cookies.secure', true),
+            config('laravel-instant.cookies.httponly', true)
         );
     }
 
-    protected function setSecretKey(string $secretKey)
+    public function setDomain(string $domain)
+    {
+        $this->domain = $domain;
+
+        return $this;
+    }
+
+    public function setSecretKey(string $secretKey)
     {
         $this->secretKey = $secretKey;
 
@@ -219,7 +233,7 @@ class Token
     /**
      * Melakukan set token ke cookies
      */
-    protected function setTokenCookie(string $token, string $tokenName, int $expired = 3600): bool
+    public function setTokenCookie(string $token, string $tokenName, int $expired = 3600): bool
     {
         $domain = Helper::getDomain($this->domain, request()->getHost() ?? null, ['port' => false]);
 
@@ -238,7 +252,7 @@ class Token
      *
      * @return array
      */
-    protected function verification(?string $token = null)
+    public function verification(?string $token = null)
     {
         try {
             // Verifikasi string token
@@ -275,38 +289,5 @@ class Token
         } catch (\Exception $e) {
             throw new ErrorException('Token verification failed', 401);
         }
-    }
-
-    /**
-     * Handle dynamic method calls into the class.
-     *
-     * @param  string  $method
-     * @param  array  $args
-     * @return mixed
-     */
-    public function __call($method, $args)
-    {
-        if (method_exists($this, $method) && is_callable([$this, $method])) {
-            return $this->$method(...$args);
-        }
-
-        throw new \BadMethodCallException("Method {$method} tidak ditemukan.");
-    }
-
-    /**
-     * Handle dynamic static method calls into the class.
-     *
-     * @param  string  $method
-     * @param  array  $args
-     * @return mixed
-     */
-    public static function __callStatic($method, $args)
-    {
-        $instance = new static;
-        if (method_exists($instance, $method) && is_callable([$instance, $method])) {
-            return $instance->$method(...$args);
-        }
-
-        throw new \BadMethodCallException("Method {$method} tidak ditemukan.");
     }
 }
