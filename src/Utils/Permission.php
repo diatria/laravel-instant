@@ -25,8 +25,8 @@ class Permission
 
             $this->action = $action;
 
-            $tokenInfo = Token::verification();
-            $user = User::where('uuid', Helper::get($tokenInfo, 'uuid'))->first();
+            $token = (new Token)->verification();
+            $user = User::where('uuid', Helper::get($token, 'uuid'))->first();
 
             if (! $user) {
                 throw new ErrorException('Unauthorized', 401);
