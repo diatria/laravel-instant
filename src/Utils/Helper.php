@@ -155,7 +155,7 @@ class Helper
     static function getUserID(): int
     {
         if (config("laravel-instant.auth.driver", "sanctum") === "jwt") {
-            $token = Token::verification();
+            $token = (new Token)->verification();
             if (!Helper::get($token, 'uuid')) {
                 throw new ErrorException('UUID tidak ditemukan didalam token!', 500);
             }
