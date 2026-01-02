@@ -7,34 +7,77 @@ use Diatria\LaravelInstant\Http\Controllers\PermissionController;
 use Diatria\LaravelInstant\Http\Controllers\RolePermissionController;
 
 Route::prefix("api/" . config('laravel-instant.route.prefix'))->group(function () {
-    Route::get("permissions", [PermissionController::class, "all"]);
-    Route::get("permissions/table", [PermissionController::class, "table"]);
-    Route::get("permissions/{id}", [PermissionController::class, "find"]);
-    Route::post("permissions", [PermissionController::class, "create"]);
-    Route::put("permissions/{id}", [PermissionController::class, "update"]);
-    Route::delete("permissions/{id?}", [PermissionController::class, "remove"]);
+    if (app()->version() < 8) {
+        // Laravel 8 bellow
+        Route::get("permissions", "\Diatria\LaravelInstant\Http\Controllers\PermissionController@all");
+        Route::get("permissions/table", "Diatria\LaravelInstant\Http\Controllers\PermissionController@table");
+        Route::get("permissions/{id}", "Diatria\LaravelInstant\Http\Controllers\PermissionController@find");
+        Route::post("permissions", "Diatria\LaravelInstant\Http\Controllers\PermissionController@create");
+        Route::put("permissions/{id}", "Diatria\LaravelInstant\Http\Controllers\PermissionController@update");
+        Route::delete("permissions/{id?}", "Diatria\LaravelInstant\Http\Controllers\PermissionController@remove");
 
-    Route::get("roles", [RoleController::class, "all"]);
-    Route::get("roles/table", [RoleController::class, "table"]);
-    Route::get("roles/{id}", [RoleController::class, "find"]);
-    Route::post("roles", [RoleController::class, "create"]);
-    Route::put("roles/{id}", [RoleController::class, "update"]);
-    Route::delete("roles/{id?}", [RoleController::class, "remove"]);
+        Route::get("roles", "\Diatria\LaravelInstant\Http\Controllers\PermissionController@all");
+        Route::get("roles/table", "\Diatria\LaravelInstant\Http\Controllers\PermissionController@table");
+        Route::get("roles/{id}", "\Diatria\LaravelInstant\Http\Controllers\PermissionController@find");
+        Route::post("roles", "\Diatria\LaravelInstant\Http\Controllers\PermissionController@create");
+        Route::put("roles/{id}", "\Diatria\LaravelInstant\Http\Controllers\PermissionController@update");
+        Route::delete("roles/{id?}", "\Diatria\LaravelInstant\Http\Controllers\PermissionController@remove");
 
-    Route::get("role-permissions", [RolePermissionController::class, "all"]);
-    Route::get("role-permissions/table", [RolePermissionController::class, "table"]);
-    Route::get("role-permissions/{id}", [RolePermissionController::class, "find"]);
-    Route::post("role-permissions", [RolePermissionController::class, "create"]);
-    Route::put("role-permissions/{id}", [RolePermissionController::class, "update"]);
-    Route::delete("role-permissions/{id?}", [RolePermissionController::class, "remove"]);
+        Route::get("role-permissions", "\Diatria\LaravelInstant\Http\Controllers\PermissionController@all");
+        Route::get("role-permissions/table", "\Diatria\LaravelInstant\Http\Controllers\PermissionController@table");
+        Route::get("role-permissions/{id}", "\Diatria\LaravelInstant\Http\Controllers\PermissionController@find");
+        Route::post("role-permissions", "\Diatria\LaravelInstant\Http\Controllers\PermissionController@create");
+        Route::put("role-permissions/{id}", "\Diatria\LaravelInstant\Http\Controllers\PermissionController@update");
+        Route::delete("role-permissions/{id?}", "\Diatria\LaravelInstant\Http\Controllers\PermissionController@remove");
 
-    Route::get("users", [RolePermissionController::class, "all"]);
-    Route::get("users/check", [RolePermissionController::class, "check"]); // Check validation token
-    Route::get("users/table", [RolePermissionController::class, "table"]);
-    Route::get("users/{id}", [RolePermissionController::class, "find"]);
-    Route::post("users", [RolePermissionController::class, "register"]);
-    Route::post("users/login", [RolePermissionController::class, "login"]);
-    Route::post("users/token/refresh", [RolePermissionController::class, "refreshToken"]);
-    Route::put("users/{id}", [RolePermissionController::class, "update"]);
-    Route::delete("users/{id?}", [RolePermissionController::class, "remove"]);
+        Route::get("users", "\Diatria\LaravelInstant\Http\Controllers\PermissionController@all");
+        Route::get("users/check", "\Diatria\LaravelInstant\Http\Controllers\PermissionController@check"); // Check validation token
+        Route::get("users/table", "\Diatria\LaravelInstant\Http\Controllers\PermissionController@table");
+        Route::get("users/{id}", "\Diatria\LaravelInstant\Http\Controllers\PermissionController@find");
+        Route::post("users", "\Diatria\LaravelInstant\Http\Controllers\PermissionController@register");
+        Route::post("users/login", "\Diatria\LaravelInstant\Http\Controllers\PermissionController@login");
+        Route::post("users/token/refresh", "\Diatria\LaravelInstant\Http\Controllers\PermissionController@refreshToken");
+        Route::put("users/{id}", "\Diatria\LaravelInstant\Http\Controllers\PermissionController@update");
+        Route::delete("users/{id?}", "\Diatria\LaravelInstant\Http\Controllers\PermissionController@remove");
+    } else {
+        // Laravel 8 above
+        Route::controller(PermissionController::class)->group(function () {
+            Route::get("permissions", "all");
+            Route::get("permissions/table", "table");
+            Route::get("permissions/{id}", "find");
+            Route::post("permissions", "create");
+            Route::put("permissions/{id}", "update");
+            Route::delete("permissions/{id?}", "remove");
+        });
+
+        Route::controller(RoleController::class)->group(function () {
+            Route::get("roles", "all");
+            Route::get("roles/table", "table");
+            Route::get("roles/{id}", "find");
+            Route::post("roles", "create");
+            Route::put("roles/{id}", "update");
+            Route::delete("roles/{id?}", "remove");
+        });
+
+        Route::controller(RolePermissionController::class)->group(function () {
+            Route::get("role-permissions", "all");
+            Route::get("role-permissions/table", "table");
+            Route::get("role-permissions/{id}", "find");
+            Route::post("role-permissions", "create");
+            Route::put("role-permissions/{id}", "update");
+            Route::delete("role-permissions/{id?}", "remove");
+        });
+
+        Route::controller(UserController::class)->group(function () {
+            Route::get("users", "all");
+            Route::get("users/check", "check"); // Check validation token
+            Route::get("users/table", "table");
+            Route::get("users/{id}", "find");
+            Route::post("users", "register");
+            Route::post("users/login", "login");
+            Route::post("users/token/refresh", "refreshToken");
+            Route::put("users/{id}", "update");
+            Route::delete("users/{id?}", "remove");
+        });
+    }
 });

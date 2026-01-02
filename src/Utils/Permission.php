@@ -1,11 +1,16 @@
 <?php
+
 namespace Diatria\LaravelInstant\Utils;
 
 use Diatria\LaravelInstant\Models\User;
+use Firebase\JWT\SignatureInvalidException;
 
 class Permission
 {
-    protected $permission, $action;
+    protected $permission;
+
+    protected $action;
+
     public function __construct($permission)
     {
         $this->permission = $permission;
@@ -20,15 +25,15 @@ class Permission
 
             $this->action = $action;
 
-            $tokenInfo = Token::info();
-            $user = User::where("uuid", $tokenInfo["uuid"])->first();
+            $token = (new Token)->verification();
+            $user = User::where('uuid', Helper::get($token, 'uuid'))->first();
 
-            if (!$user) {
-                throw new ErrorException("Unauthorized", 401);
+            if (! $user) {
+                throw new ErrorException('Unauthorized', 401);
             }
 
             if (empty($user->permissions)) {
-                throw new ErrorException("Permissions not found, please insert permission before take action", 404);
+                throw new ErrorException('Permissions not found, please insert permission before take action', 404);
             }
 
             $haveAccess = in_array(
@@ -36,17 +41,20 @@ class Permission
                 $user->permissions->toArray()
             );
 
-            if (!$haveAccess) {
-                throw new ErrorException("Permission denied", 403);
+            if (! $haveAccess) {
+                throw new ErrorException('Permission denied', 403);
             }
 
             return $haveAccess;
+        } catch (SignatureInvalidException $e) {
+            throw new ErrorException($e->getMessage(), $e->getCode());
         } catch (ErrorException $e) {
             throw new ErrorException($e->getMessage(), $e->getCode());
         } catch (\Exception $e) {
             throw new ErrorException($e->getMessage(), $e->getCode());
         }
     }
+
     public function getAction()
     {
         return Helper::get($this->permission, $this->action);

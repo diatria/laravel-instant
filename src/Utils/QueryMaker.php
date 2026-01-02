@@ -156,7 +156,6 @@ class QueryMaker
     /**
      * Membuat query
      *
-     * @return \Illuminate\Support\Collection
      */
     public function create()
     {
@@ -168,13 +167,26 @@ class QueryMaker
             if ($this->queries) {
                 foreach ($this->queries as $item) {
                     $item = collect($item);
-                    if ($item->get('strict')) {
-                        $query = $query->where($item->get('field'), $item->get('value'));
-                    } elseif (gettype($item->get('value')) === 'object') {
+                    $value = $item->get('value');
+                    // Object Value
+                    if (gettype($item->get('value')) === 'object') {
                         $query = $query->whereIn($item->get('field'), $item->get('value'));
-                    } else {
-                        $value = $item->get('value');
-                        $query = $query->where($item->get('field'), 'like', "%{$value}%");
+                    }
+                    // Operator "Not Equal"
+                    elseif ($item->get('op') == 'ne'){
+                        $value = "%{$value}%";
+                        if ($item->get('strict')) {
+                            $value = $item->get('value');
+                        }
+                        $query = $query->where($item->get('field'), '!=', $value);
+                    }
+                    // Basic where
+                    else {
+                        $value = "%{$value}%";
+                        if ($item->get('strict')) {
+                            $value = $item->get('value');
+                        }
+                        $query = $query->where($item->get('field'), 'like', $value);
                     }
                 }
             }

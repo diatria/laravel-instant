@@ -5,13 +5,12 @@ namespace Diatria\LaravelInstant\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -47,18 +46,15 @@ class User extends Authenticatable
         ];
     }
 
-    public function permissions(): Attribute
+    public function getPermissionsAttribute()
     {
-        return new Attribute(
-            get: function () {
-                return RolePermission::where("role_id", $this->role_id)
-                    ->join(
-                        "permissions",
-                        "role_permissions.permission_id",
-                        "permissions.id"
-                    )
-                    ->pluck("permissions.name");
-            }
-        );
+        return RolePermission::where('role_id', $this->role_id)
+            ->join(
+                'permissions',
+                'role_permissions.permission_id',
+                '=',
+                'permissions.id'
+            )
+            ->pluck('permissions.name');
     }
 }

@@ -1,13 +1,12 @@
 <?php
+
 namespace Diatria\LaravelInstant\Services;
 
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Diatria\LaravelInstant\Models\User;
 use Diatria\LaravelInstant\Utils\Token;
 use Diatria\LaravelInstant\Utils\Helper;
 use Illuminate\Support\Facades\Validator;
-use Diatria\LaravelInstant\Utils\Response;
 use Diatria\LaravelInstant\Utils\ErrorException;
 use Diatria\LaravelInstant\Traits\InstantServiceTrait;
 use Diatria\LaravelInstant\Http\Responses\UserResponse;
@@ -61,16 +60,19 @@ class UserService
 
     public function check()
     {
-        return Token::check();
+        return Token::verification();
     }
 
     public function getID()
     {
-        if (Token::check()) {
-            $token = Token::info();
-            $user = $this->model->where("uuid", $token["uuid"])->first();
-            return $user->id;
+        $token = Token::verification();
+        if ($token) {
+            if (collect($token)->has('uuid')) {
+                $user = $this->model->where("uuid", Helper::get($token, "uuid"))->first();
+                return $user ? $user->id : null;
+            }
         }
+        return null;
     }
 
     public function login(array $params)
@@ -100,9 +102,6 @@ class UserService
                 "role_id" => $user->role_id ?? null,
             ]);
 
-            // Set tooken cookies
-            Token::setToken($token["token"]);
-
             return [
                 ...$token,
                 "user_id" => $user->id,
@@ -115,16 +114,5 @@ class UserService
         } else {
             throw new ErrorException("Wrong username or password", 401);
         }
-    }
-
-    /**
-     * Melakukan refresh token dan melakukan set ulang cookies
-     */
-    public function refreshToken($refreshToken)
-    {
-        if (empty($refreshToken)) {
-            throw new ErrorException("Token not found!", 404);
-        }
-        return Token::refreshToken($refreshToken);
     }
 }

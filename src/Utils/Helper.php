@@ -5,10 +5,13 @@ namespace Diatria\LaravelInstant\Utils;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
+use Diatria\LaravelInstant\Utils\Token;
+use GuzzleHttp\Client;
+use GuzzleHttp\Cookie\CookieJar;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 
 class Helper
 {
@@ -34,7 +37,7 @@ class Helper
      * @param array $haystack
      * @param array $only
      */
-    static function arrayOnly($haystack, $only): Collection
+    static function arrayOnly($haystack, $only)
     {
         return collect($haystack)->map(fn($item) => collect($item)->only($only));
     }
@@ -42,7 +45,7 @@ class Helper
     /**
      * Menghitung average dari array
      */
-    static function avg(array $array): int
+    static function avg(array $array)
     {
         $sum = collect($array)->sum();
         return $sum / count($array);
@@ -61,7 +64,7 @@ class Helper
      * formatting date to indonesia format
      * @param String $date
      */
-    static function dateIndonesia($date): string|null
+    static function dateIndonesia($date)
     {
         if (empty($date)) {
             return null;
@@ -88,7 +91,7 @@ class Helper
         return $th->result();
     }
 
-    static function getDomain(string $domain = null, string $default = null, array $config = ["port" => true])
+    static function getDomain(?string $domain = null, ?string $default = null, array $config = ["port" => true, "throw_error" => false])
     {
         $http_origin = isset($_SERVER["HTTP_ORIGIN"]) ? $_SERVER["HTTP_ORIGIN"] : null;
         $http_referer = isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : null;
@@ -100,7 +103,7 @@ class Helper
             $domain = $default;
         }
 
-        if (!$domain) {
+        if (!$domain && $config["throw_error"]) {
             throw new ErrorException("Tidak ada domain yang ditemukan", 500);
         }
 
@@ -151,12 +154,15 @@ class Helper
         return "{$modelClassName}:{$action}";
     }
 
-    static function getUserID(): int
+    static function getUserID()
     {
         if (config("laravel-instant.auth.driver", "sanctum") === "jwt") {
-            $token = Token::info();
+            $token = Token::verification();
+            if (!Helper::get($token, 'uuid')) {
+                throw new ErrorException('UUID tidak ditemukan didalam token!', 500);
+            }
             $user = DB::table("users")
-                ->where("uuid", $token["uuid"])
+                ->where("uuid", Helper::get($token, 'uuid') ?? null)
                 ->first();
             return self::get($user, "id");
         } else {
@@ -177,7 +183,7 @@ class Helper
         }
     }
 
-    static function hasUserID(Model $model): bool
+    static function hasUserID(Model $model)
     {
         return collect($model->getFillable())->contains("user_id");
     }
@@ -185,15 +191,20 @@ class Helper
     /**
      * Make request template from Illuminate\Support\Facades\Http with cookies
      */
-    static function http() {
+    static function http()
+    {
         $domain = self::getDomain(null, request()->domain ?? null, ["port" => false]);
-        return Http::withCookies(Helper::httpCookies(), $domain);
-    }
 
-    static function httpCookies() {
-        return [
-            strtolower(env("APP_TOKEN_NAME") . "_TOKEN") => Token::getToken()
-        ];
+        $cookieJar = CookieJar::fromArray([
+            config('laravel_instant.auth.access_token_name') => (new Token)->getAccessToken()
+        ], $domain);
+
+        $client = new Client([
+            "timeout" => 5.0,
+            'cookies' => $cookieJar
+        ]);
+
+        return $client;
     }
 
     static function log($message)
@@ -202,7 +213,7 @@ class Helper
         Log::debug($message);
     }
 
-    static function minuteToTime(int $minutes): string
+    static function minuteToTime(int $minutes)
     {
         $hours = intdiv($minutes, 60);
         $hoursLeadingZero = $hours < 10 ? "0" . $hours : $hours;
@@ -213,7 +224,16 @@ class Helper
         return $hoursLeadingZero . ":" . $minutesLeadingZero . ":00";
     }
 
-    static function throw($message): \Exception
+    /**
+     * Menampilkan url storage_path dengan base path APP_URL
+     * @param string $path
+     */
+    static public function storageUrl(string $path)
+    {
+        return config('app.url') . '/storage/' . $path;
+    }
+
+    static function throw($message)
     {
         throw new \Exception($message);
     }
@@ -235,7 +255,7 @@ class Helper
         return json_decode(json_encode($haystack), $arrayAssociative);
     }
 
-    static function toArrayCollection($haystack, $flag = true): Collection
+    static function toArrayCollection($haystack, $flag = true)
     {
         return collect(self::toArray($haystack, $flag));
     }

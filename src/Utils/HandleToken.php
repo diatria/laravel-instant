@@ -4,7 +4,6 @@ namespace Diatria\LaravelInstant\Utils;
 
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
-use App\Utils\Response;
 use Firebase\JWT\ExpiredException;
 use Firebase\JWT\SignatureInvalidException;
 
