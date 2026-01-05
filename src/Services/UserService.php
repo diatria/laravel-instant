@@ -61,12 +61,12 @@ class UserService
 
     public function check()
     {
-        return Token::verification();
+        return (new Token)->verification();
     }
 
     public function getID()
     {
-        $token = Token::verification();
+        $token = (new Token)->verification();
         if ($token) {
             if (collect($token)->has('uuid')) {
                 $user = $this->model->where("uuid", Helper::get($token, "uuid"))->first();
