@@ -152,15 +152,15 @@ class Helper
         return "{$modelClassName}:{$action}";
     }
 
-    static function getUserID(): int
+    static function getUserID(string $field = 'uuid', string $table = 'users'): int
     {
         if (config("laravel-instant.auth.driver", "sanctum") === "jwt") {
             $token = (new Token)->verification();
-            if (!Helper::get($token, 'uuid')) {
-                throw new ErrorException('UUID tidak ditemukan didalam token!', 500);
+            if (!Helper::get($token, $field)) {
+                throw new ErrorException(strtoupper($field) . ' tidak ditemukan didalam token!', 500);
             }
-            $user = DB::table("users")
-                ->where("uuid", Helper::get($token, 'uuid') ?? null)
+            $user = DB::table($table)
+                ->where($field, Helper::get($token, $field) ?? null)
                 ->first();
             return self::get($user, "id");
         } else {
