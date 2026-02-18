@@ -79,7 +79,7 @@ trait InstantServiceTrait
     public function find(Collection $params)
     {
         try {
-            $params->only(['relations']);
+            $params->only(['relations', 'relations_count']);
 
             // search for data based on the "id" field
             $params->put('queries', [['field' => 'id', 'value' => $params->get('id'), 'strict' => true], ...$params->get('queries', [])]);
@@ -142,6 +142,10 @@ trait InstantServiceTrait
 
             if ($request->get('relations')) {
                 $query = $query->setRelations($request->get('relations'));
+            }
+
+            if ($request->get('relations_count')) {
+                $query = $query->setRelationsCount($request->get('relations_count'));
             }
             return $query->create();
         } catch (ErrorException $e) {
