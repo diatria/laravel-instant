@@ -79,7 +79,7 @@ trait InstantServiceTrait
     public function find(Collection $params)
     {
         try {
-            $params->only(['relations', 'relations_count']);
+            $params->only(['relations']);
 
             // search for data based on the "id" field
             $params->put('queries', [['field' => 'id', 'value' => $params->get('id'), 'strict' => true], ...$params->get('queries', [])]);
@@ -143,10 +143,6 @@ trait InstantServiceTrait
             if ($request->get('relations')) {
                 $query = $query->setRelations($request->get('relations'));
             }
-
-            if ($request->get('relations_count')) {
-                $query = $query->setRelationsCount($request->get('relations_count'));
-            }
             return $query->create();
         } catch (ErrorException $e) {
             throw new ErrorException($e->getMessage(), $e->getCode());
@@ -182,7 +178,7 @@ trait InstantServiceTrait
     /**
      * @param \Illuminate\Support\Collection $params => array, http_request
      */
-    public function store(Collection $params): Collection
+    public function store(Collection $params, array $config = []): Collection
     {
         try {
             $data = [];
@@ -221,7 +217,11 @@ trait InstantServiceTrait
             } else {
                 // Action Create
                 $params = $params->put('created_by', (new UserService())->initModel()->getID());
-                $data = $this->model->create($params->toArray());
+                if ($config['first_or_create'] ?? false) {
+                    $data = $this->model->firstOrCreate($params->only($this->columnsRequired)->toArray(), $params->toArray());
+                } else {
+                    $data = $this->model->create($params->toArray());
+                }
                 $data = $this->model->find($data->id);
             }
 
