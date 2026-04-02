@@ -49,6 +49,10 @@ class LaravelInstantServiceProvider extends ServiceProvider
             __DIR__ . '/../publish/config/laravel-instant.php' => config_path('laravel-instant.php')
         ], 'li-config');
 
+        $this->publishes([
+            __DIR__ . '/../CLAUDE.md' => base_path('CLAUDE.md')
+        ], 'li-docs');
+
         $this->loadRoutesFrom(__DIR__ . "/Routes/api.php");
     }
 }
