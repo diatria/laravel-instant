@@ -49,11 +49,7 @@ trait InstantServiceTrait
             }
 
             return $query;
-        } catch (ErrorException $e) {
-            throw new ErrorException($e->getMessage(), $e->getCode());
-        } catch (\Exception $e) {
-            throw new ErrorException($e->getMessage(), $e->getCode());
-        } catch (\PDOException $e) {
+        } catch (\Throwable $e) {
             throw new ErrorException($e->getMessage(), $e->getCode());
         }
     }
@@ -63,7 +59,7 @@ trait InstantServiceTrait
      */
     public function config(array $conf)
     {
-        if ($conf['disable_duplicate_ref_id']) {
+        if (isset($conf['disable_duplicate_ref_id']) && $conf['disable_duplicate_ref_id']) {
             $this->disableDuplicateRefID = true;
         }
 
@@ -103,11 +99,7 @@ trait InstantServiceTrait
             }
 
             return $query;
-        } catch (ErrorException $e) {
-            throw new ErrorException($e->getMessage(), $e->getCode());
-        } catch (\Exception $e) {
-            throw new ErrorException($e->getMessage(), $e->getCode());
-        } catch (\PDOException $e) {
+        } catch (\Throwable $e) {
             throw new ErrorException($e->getMessage(), $e->getCode());
         }
     }
@@ -144,11 +136,7 @@ trait InstantServiceTrait
                 $query = $query->setRelations($request->get('relations'));
             }
             return $query->create();
-        } catch (ErrorException $e) {
-            throw new ErrorException($e->getMessage(), $e->getCode());
-        } catch (\Exception $e) {
-            throw new ErrorException($e->getMessage(), $e->getCode());
-        } catch (\PDOException $e) {
+        } catch (\Throwable $e) {
             throw new ErrorException($e->getMessage(), $e->getCode());
         }
     }
@@ -216,7 +204,14 @@ trait InstantServiceTrait
                 $data = $this->model->find($haveID);
             } else {
                 // Action Create
-                $params = $params->put('created_by', (new UserService())->initModel()->getID());
+                try {
+                    $userId = (new UserService())->initModel()->getID();
+                    $params = $params->put('created_by', $userId);
+                } catch (\Exception $e) {
+                    // Skip created_by if user retrieval fails
+                    Helper::log("Warning: Could not get user ID for created_by field: " . $e->getMessage());
+                }
+
                 if ($config['first_or_create'] ?? false) {
                     $data = $this->model->firstOrCreate($params->only($this->columnsRequired)->toArray(), $params->toArray());
                 } else {
@@ -231,11 +226,7 @@ trait InstantServiceTrait
             }
 
             return collect($data);
-        } catch (\Exception $e) {
-            throw new ErrorException($e->getMessage(), $e->getCode());
-        } catch (ErrorException $e) {
-            throw new ErrorException($e->getMessage(), $e->getCode());
-        } catch (\PDOException $e) {
+        } catch (\Throwable $e) {
             throw new ErrorException($e->getMessage(), $e->getCode());
         }
     }
@@ -287,15 +278,16 @@ trait InstantServiceTrait
             if ($this->responseFormatClass) {
                 $response = $this->responseFormatClass;
                 if ($params->get('relations') || $params->get('relations_count')) {
-                    $response->with(array_merge($params->get('relations'), $params->get('relations_count', [])));
+                    $response->with(array_merge(
+                        $params->get('relations', []),
+                        $params->get('relations_count', [])
+                    ));
                 }
                 return $response->table($paginator);
             }
 
             return $paginator;
-        } catch (ErrorException $e) {
-            throw new ErrorException($e->getMessage(), $e->getCode());
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             throw new ErrorException($e->getMessage(), $e->getCode());
         }
     }
@@ -317,7 +309,7 @@ trait InstantServiceTrait
             $userCollection = Helper::arrayOnly($queryService->items(), $request->get('column'));
             $paginator = new LengthAwarePaginator($userCollection, $queryService->total(), $queryService->perPage(), $queryService->currentPage(), $pageOptions);
             return Helper::toArrayCollection($paginator);
-        } catch (ErrorException $e) {
+        } catch (\Throwable $e) {
             throw new ErrorException($e->getMessage(), $e->getCode());
         }
     }

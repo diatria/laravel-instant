@@ -34,10 +34,16 @@ class MakeControllerCommand extends Command
 		$explodingArgs = explode('/', $argument);
 		$path = implode('/', Arr::take($explodingArgs, count($explodingArgs) - 1));
 		$name = str_replace('Controller', '', $explodingArgs[count($explodingArgs) - 1]); // UserController => User
-		$namespace = $this->backslash('App\Http\Controllers\\' . $path);
-		$namespaceModel = 'App\Models\\' . $name;
-		$namespaceService = $this->backslash('App\Services\\' . $path . '\\' . $name) . 'Service';
-		
+
+		// Build namespaces
+		$namespace = !empty($path)
+			? $this->backslash('App\Http\Controllers\\' . $path)
+			: 'App\Http\Controllers';
+		$namespaceModel = 'App\Models' . (!empty($path) ? '\\' . str_replace('/', '\\', $path) : '') . '\\' . $name;
+		$namespaceService = !empty($path)
+			? $this->backslash('App\Services\\' . $path . '\\' . $name) . 'Service'
+			: 'App\Services\\' . $name . 'Service';
+
 		// File path stub service
         $stubPath = __DIR__ . "/../../../stubs/controller.stub";
 
@@ -46,12 +52,12 @@ class MakeControllerCommand extends Command
 
 		// Membuat folder jika tidak ditemukan
         $this->createFolderIfNotExists(app_path(
-			"Http/Controllers/" . $path
+			"Http/Controllers/" . ($path ? $path : '')
 		));
 
 		// Target File Service nantinya disimpan
         $targetPath = app_path(
-            "Http/Controllers/" . $path . '/' . $name . "Controller" . ".php"
+            "Http/Controllers/" . ($path ? $path . '/' : '') . $name . "Controller" . ".php"
         );
 
 		$stubContent = str_replace(
