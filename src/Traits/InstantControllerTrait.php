@@ -28,6 +28,9 @@ trait InstantControllerTrait
             if ($params->has("relations")) {
                 $params = $params->merge(["relations" => $request->relations]);
             }
+            if ($params->has('relations_count')) {
+                $params = $params->merge(['relations_count' => $request->relations_count]);
+            }
             $params = $params->put("id", $request->id);
 
             // Call Service Find

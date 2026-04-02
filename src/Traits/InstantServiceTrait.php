@@ -178,7 +178,7 @@ trait InstantServiceTrait
     /**
      * @param \Illuminate\Support\Collection $params => array, http_request
      */
-    public function store(Collection $params): Collection
+    public function store(Collection $params, array $config = []): Collection
     {
         try {
             $data = [];
@@ -217,7 +217,11 @@ trait InstantServiceTrait
             } else {
                 // Action Create
                 $params = $params->put('created_by', (new UserService())->initModel()->getID());
-                $data = $this->model->create($params->toArray());
+                if ($config['first_or_create'] ?? false) {
+                    $data = $this->model->firstOrCreate($params->only($this->columnsRequired)->toArray(), $params->toArray());
+                } else {
+                    $data = $this->model->create($params->toArray());
+                }
                 $data = $this->model->find($data->id);
             }
 
