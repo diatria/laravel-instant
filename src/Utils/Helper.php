@@ -152,7 +152,7 @@ class Helper
         return "{$modelClassName}:{$action}";
     }
 
-    static function getUserID(string $field = 'uuid', string $table = 'users'): int
+    static function getUserID(string $field = 'uuid', string $table = 'users'): ?int
     {
         if (config("laravel-instant.auth.driver", "sanctum") === "jwt") {
             $token = (new Token)->verification();
@@ -170,14 +170,25 @@ class Helper
     }
 
     /**
+     * Check if user has permission for specific action
      * @return Boolean
      */
     static function hasPermission(Request $request, $model, $action)
     {
-        return true;
-        $permissionSlug = self::getPermissionSlug($model, $action);
-        if (!$request->user()->tokenCan($permissionSlug)) {
-            throw new \Exception("Unauthorized", 401);
+        try {
+            $user = $request->user();
+            if (!$user) {
+                throw new ErrorException("User not authenticated", 401);
+            }
+
+            $permissionSlug = self::getPermissionSlug($model, $action);
+            if (!$user->tokenCan($permissionSlug)) {
+                throw new ErrorException("Unauthorized: {$permissionSlug}", 403);
+            }
+
+            return true;
+        } catch (\Exception $e) {
+            throw new ErrorException($e->getMessage(), $e->getCode());
         }
     }
 

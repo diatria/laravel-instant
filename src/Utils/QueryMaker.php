@@ -164,29 +164,40 @@ class QueryMaker
             if (!$query) {
                 throw new ErrorException("Model not found, please initiate it first, use 'initModel()'", 404);
             }
+
+            // Apply authentication filter FIRST before any other conditions
+            if ($this->authentication) {
+                $query = $query->where('user_id', Helper::getUserID());
+            }
+
             if ($this->queries) {
                 foreach ($this->queries as $item) {
                     $item = collect($item);
                     $value = $item->get('value');
-                    // Object Value
-                    if (gettype($item->get('value')) === 'object') {
-                        $query = $query->whereIn($item->get('field'), $item->get('value'));
+
+                    // Array/Collection Value - use whereIn
+                    if (is_array($value) || $value instanceof \Illuminate\Support\Collection) {
+                        $query = $query->whereIn($item->get('field'), $value);
                     }
                     // Operator "Not Equal"
-                    elseif ($item->get('op') == 'ne'){
-                        $value = "%{$value}%";
+                    elseif ($item->get('op') == 'ne') {
                         if ($item->get('strict')) {
-                            $value = $item->get('value');
+                            // Exact not equal
+                            $query = $query->where($item->get('field'), '!=', $value);
+                        } else {
+                            // Not equal with LIKE pattern
+                            $query = $query->where($item->get('field'), 'NOT LIKE', "%{$value}%");
                         }
-                        $query = $query->where($item->get('field'), '!=', $value);
                     }
-                    // Basic where
+                    // Basic where (default is LIKE for search)
                     else {
-                        $value = "%{$value}%";
                         if ($item->get('strict')) {
-                            $value = $item->get('value');
+                            // Exact match
+                            $query = $query->where($item->get('field'), '=', $value);
+                        } else {
+                            // LIKE search
+                            $query = $query->where($item->get('field'), 'LIKE', "%{$value}%");
                         }
-                        $query = $query->where($item->get('field'), 'like', $value);
                     }
                 }
             }
@@ -208,6 +219,7 @@ class QueryMaker
                         ->toArray(),
                 );
             }
+
             if ($this->order) {
                 $splitText = explode(':', $this->order); // Contoh text: 'name:asc'
                 $order = [
@@ -216,21 +228,23 @@ class QueryMaker
                 ];
                 $query = $query->orderBy($order['field'], $order['mode']);
             }
+
             if ($this->pagination === false) {
                 $this->unsetPagination();
             }
+
             if ($this->pagination) {
                 return $query->paginate($this->paginationLength);
             }
-            if ($this->authentication) {
-                $query = $query->where('user_id', Helper::getUserID());
-            }
+
             if ($this->limit) {
                 return $query->limit($this->limit)->get();
             }
+
             if ($this->mode === 'first') {
                 return $query->first();
             }
+
             if ($this->mode === 'get') {
                 return $query->get();
             }

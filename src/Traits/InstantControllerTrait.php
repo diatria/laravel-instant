@@ -37,9 +37,9 @@ trait InstantControllerTrait
             $data = $this->service->find($params);
             return Response::json($data, "Data berhasil diambil dengan id: {$request->id}");
         } catch (ErrorException $e) {
-            return $e->getResponse();
+            return Response::errorJson($e);
         } catch (\Exception $e) {
-            return Response::getResponse($e);
+            return Response::errorJson($e);
         }
     }
 

@@ -13,10 +13,24 @@ class Response
     public static function json($data = null, string $message = '', $errorCode = 200, array $trace = [])
     {
         $payloadOptional = [];
-        if (env('APP_DEBUG')) {
+        if (env('APP_DEBUG') && env('APP_ENV') !== 'production') {
+            // Filter sensitive fields from request
+            $requestData = collect(request()->all())->except([
+                'password',
+                'password_confirmation',
+                'token',
+                'api_token',
+                'access_token',
+                'refresh_token',
+                'secret',
+                'key',
+                'credit_card',
+                'card_number',
+            ])->toArray();
+
             $payloadOptional = [
                 'memory_usage' => Helper::convertDiskCapacity(memory_get_usage()),
-                'request' => request()->all(),
+                'request' => $requestData,
                 'trace' => self::traceError($trace),
             ];
         }
