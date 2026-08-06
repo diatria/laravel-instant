@@ -241,7 +241,7 @@ trait InstantServiceTrait
      * - relations          optional    array
      * - mode               optional    default:get
      */
-    public function table(Collection $params)
+    public function table(Collection $params, ?callable $callback = null): LengthAwarePaginator
     {
         try {
             $paginate = $params->get('pagination_length', GeneralConfig::PAGINATE_PER_PAGE);
@@ -271,6 +271,10 @@ trait InstantServiceTrait
 
             // Data dari database yang diubah ke Array
             $userCollection = Helper::arrayOnly($query->items(), $params->get('column'));
+
+            if ($callback) {
+                $userCollection = $callback($userCollection);
+            }
 
             // Membuat ulang pagination
             $paginator = new LengthAwarePaginator($userCollection, $query->total(), $query->perPage(), $query->currentPage(), $pageOptions);
