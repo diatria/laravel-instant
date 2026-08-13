@@ -23,7 +23,7 @@ trait InstantServiceTrait
     {
         try {
             if ($params) {
-                $params->only(['relations']);
+                $params->only(['relations', 'relationCount']);
 
                 // displays data along with relationships
                 $params->put('relations', $params->get('relations', $this->responseFormatRelations ?? []));
@@ -134,6 +134,9 @@ trait InstantServiceTrait
 
             if ($request->get('relations')) {
                 $query = $query->setRelations($request->get('relations'));
+            }
+            if ($request->get('relations_count')) {
+                $query = $query->setRelationsCount($request->get('relations_count'));
             }
             return $query->create();
         } catch (\Throwable $e) {
