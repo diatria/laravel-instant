@@ -148,7 +148,7 @@ trait InstantServiceTrait
      * Remove data from database
      * @param int|array $id
      */
-    public function remove(int|array $id): void
+    public function remove($id): void
     {
         try {
             if (is_array($id)) {
@@ -177,11 +177,11 @@ trait InstantServiceTrait
             $validator = Validator::make($params->all(), $this->columnsRequired);
             if ($validator->fails()) {
                 $message = $validator->errors()->first();
-                throw new ErrorException($message, 500);
+                throw new ErrorException($message, 422);
             }
 
             // Filter field only specific by fillable model
-            $params = $params->only(['id', ...$this->model->getFillable()]);
+            $params = $params->only(array_merge(['id'], $this->model->getFillable()));
 
             // auto append if field contains `user_id`
             $params = Helper::appendUserID($this->model, $params);

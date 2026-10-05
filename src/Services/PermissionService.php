@@ -1,7 +1,7 @@
 <?php
 namespace Diatria\LaravelInstant\Services;
 
-use App\Models\Permission;
+use Diatria\LaravelInstant\Models\Permission;
 use Illuminate\Support\Collection;
 use Diatria\LaravelInstant\Utils\Helper;
 use Diatria\LaravelInstant\Utils\Response;

@@ -1,7 +1,7 @@
 <?php
 namespace Diatria\LaravelInstant\Services;
 
-use App\Models\RolePermission;
+use Diatria\LaravelInstant\Models\RolePermission;
 use Illuminate\Support\Collection;
 use Diatria\LaravelInstant\Utils\Helper;
 use Diatria\LaravelInstant\Utils\Response;
@@ -87,7 +87,7 @@ class RolePermissionService
      * Mengambil hanya satu data terpilih
      * @param int|string $id 'id' atau 'uid'
      */
-    public function find(int|string $id)
+    public function find($id)
     {
         try {
             $query = $this->model

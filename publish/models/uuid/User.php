@@ -1,18 +1,17 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\LaravelInstant;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Facades\Hash;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasUuids;
+    use HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -39,26 +38,17 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
-    protected function casts(): array
+    protected $casts = ["email_verified_at" => "datetime"];
+
+    public function setPasswordAttribute($value)
     {
-        return [
-            "email_verified_at" => "datetime",
-            "password" => "hashed",
-        ];
+        $this->attributes['password'] = Hash::needsRehash($value) ? Hash::make($value) : $value;
     }
 
-    public function permissions(): Attribute
+    public function getPermissionsAttribute($value)
     {
-        return new Attribute(
-            get: function () {
-                return RolePermission::where("role_id", $this->role_id)
-                    ->join(
-                        "permissions",
-                        "role_permissions.permission_id",
-                        "permissions.id"
-                    )
-                    ->pluck("permissions.name");
-            }
-        );
+        return RolePermission::where("role_id", $this->role_id)
+            ->join("permissions", "role_permissions.permission_id", "permissions.id")
+            ->pluck("permissions.name");
     }
 }

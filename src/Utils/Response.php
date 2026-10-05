@@ -65,7 +65,7 @@ class Response
         $getSpecificsTrace = collect($errors)->filter(function ($error) {
             $needle = Helper::get($error, 'class');
             foreach (config('laravel-instant.response.read_class', []) as $haystack) {
-                if (str_contains($needle, $haystack)) {
+                if (strpos($needle, $haystack) !== false) {
                     return true;
                 }
             }
@@ -97,25 +97,27 @@ class Response
         return self::json($data, $exception->getMessage(), $exception->getCode() ?? 500, $exception->getTrace());
     }
 
-    public static function isHttpCode(int|string $code): bool
+    public static function isHttpCode($code): bool
     {
-        $listHttpCode = [200, 201, 202, 401, 403, 500];
+        $listHttpCode = [200, 201, 202, 204, 400, 401, 403, 404, 422, 500];
         return in_array($code, $listHttpCode);
     }
 
     /**
      * @return array {application_code: string, http_code: int}
      */
-    public static function translateCode(int|string $code): array
+    public static function translateCode($code): array
     {
         $httpCode = [
             200 => ['application_code' => 'SUCCESS', 'http_code' => 200],
             201 => ['application_code' => 'CREATED', 'http_code' => 201],
             202 => ['application_code' => 'ACCEPTED', 'http_code' => 201],
+            204 => ['application_code' => 'NO_CONTENT', 'http_code' => 204],
             400 => ['application_code' => 'BAD_REQUEST', 'http_code' => 400],
             401 => ['application_code' => 'UNAUTHORIZED', 'http_code' => 401],
             403 => ['application_code' => 'FORBIDDEN', 'http_code' => 403],
             404 => ['application_code' => 'NOT_FOUND', 'http_code' => 404],
+            422 => ['application_code' => 'UNPROCESSABLE_ENTITY', 'http_code' => 422],
             409 => ['application_code' => 'CONFLICT', 'http_code' => 409],
             419 => ['application_code' => 'PAGE EXPIRED', 'http_code' => 419],
             429 => ['application_code' => 'TOO_MANY_REQUESTS', 'http_code' => 429],

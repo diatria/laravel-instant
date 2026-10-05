@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Models\Role;
-use App\Models\Permission;
-use App\Models\RolePermission;
+use App\Models\LaravelInstant\Role;
+use App\Models\LaravelInstant\Permission;
+use App\Models\LaravelInstant\RolePermission;
 use Illuminate\Database\Seeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 

@@ -3,7 +3,7 @@
 namespace Diatria\LaravelInstant\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
+use Diatria\LaravelInstant\Http\Controllers\Controller;
 use Diatria\LaravelInstant\Utils\Response;
 use Diatria\LaravelInstant\Utils\ErrorException;
 use Diatria\LaravelInstant\Models\RolePermission;

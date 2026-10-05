@@ -8,6 +8,11 @@ use Diatria\LaravelInstant\Console\Commands\MakeControllerCommand;
 
 class LaravelInstantServiceProvider extends ServiceProvider
 {
+    public function register(): void
+    {
+        $this->mergeConfigFrom(__DIR__ . '/../publish/config/laravel-instant.php', 'laravel-instant');
+    }
+
     /**
      * Bootstrap any package services.
      */
@@ -21,19 +26,19 @@ class LaravelInstantServiceProvider extends ServiceProvider
         }
 
         $this->publishes([
-            __DIR__ . '/../publish/models/' . config('laravel-instant.database.primary_key', 'int') . '/User.php' => app_path('Models/User.php'),
-            __DIR__ . '/../publish/models/' . config('laravel-instant.database.primary_key', 'int') . '/Permission.php' => app_path('Models/Permission.php'),
-            __DIR__ . '/../publish/models/' . config('laravel-instant.database.primary_key', 'int') . '/Role.php' => app_path('Models/Role.php'),
-            __DIR__ . '/../publish/models/' . config('laravel-instant.database.primary_key', 'int') . '/RolePermission.php' => app_path('Models/RolePermission.php'),
+            __DIR__ . '/../publish/models/' . config('laravel-instant.database.primary_key', 'int') . '/User.php' => app_path('Models/LaravelInstant/User.php'),
+            __DIR__ . '/../publish/models/' . config('laravel-instant.database.primary_key', 'int') . '/Permission.php' => app_path('Models/LaravelInstant/Permission.php'),
+            __DIR__ . '/../publish/models/' . config('laravel-instant.database.primary_key', 'int') . '/Role.php' => app_path('Models/LaravelInstant/Role.php'),
+            __DIR__ . '/../publish/models/' . config('laravel-instant.database.primary_key', 'int') . '/RolePermission.php' => app_path('Models/LaravelInstant/RolePermission.php'),
         ], 'li-model');
 
-        if (app()->version() <= 10) {
+        if (config('laravel-instant.database.migrations.enabled', false) && version_compare(app()->version(), '11.0', '<')) {
             $this->loadMigrationsFrom([
                 __DIR__ . '/../publish/database/migrations/' . config('laravel-instant.database.primary_key', 'int'),
             ]);
         }
 
-        if ((int) app()->version() >= 11) {
+        if (config('laravel-instant.database.migrations.enabled', false) && version_compare(app()->version(), '11.0', '>=')) {
             $this->publishesMigrations([
                 __DIR__ . '/../publish/database/migrations/' . config('laravel-instant.database.primary_key', 'int') => database_path('migrations'),
             ], 'li-migration');
@@ -50,9 +55,11 @@ class LaravelInstantServiceProvider extends ServiceProvider
         ], 'li-config');
 
         $this->publishes([
-            __DIR__ . '/../CLAUDE.md' => base_path('CLAUDE.md')
+            __DIR__ . '/../CLAUDE.md' => base_path('laravel-instant.md')
         ], 'li-docs');
 
-        $this->loadRoutesFrom(__DIR__ . "/Routes/api.php");
+        if (config('laravel-instant.route.enabled', false)) {
+            $this->loadRoutesFrom(__DIR__ . "/Routes/api.php");
+        }
     }
 }

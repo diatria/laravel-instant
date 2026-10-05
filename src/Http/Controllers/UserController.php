@@ -5,7 +5,7 @@ namespace Diatria\LaravelInstant\Http\Controllers;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\Controller;
+use Diatria\LaravelInstant\Http\Controllers\Controller;
 use Diatria\LaravelInstant\Models\User;
 use Diatria\LaravelInstant\Utils\Response;
 use Diatria\LaravelInstant\Services\UserService;

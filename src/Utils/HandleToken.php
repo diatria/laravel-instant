@@ -14,7 +14,11 @@ class HandleToken
     {
         try {
             // Verifikasi Token
-            $decoded = JWT::decode($token, new Key(env("JWT_KEY"), "HS256"));
+            if (class_exists(Key::class)) {
+                $decoded = JWT::decode($token, new Key(env("JWT_KEY"), "HS256"));
+            } else {
+                $decoded = JWT::decode($token, env("JWT_KEY"), ["HS256"]);
+            }
             return json_decode(json_encode($decoded), true);
         } catch (SignatureInvalidException $e) {
             return Response::error($e->getMessage(), 4001);

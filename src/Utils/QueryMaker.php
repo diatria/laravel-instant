@@ -2,260 +2,332 @@
 
 namespace Diatria\LaravelInstant\Utils;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
 class QueryMaker
 {
-    /**
-     * Class model yang digunakan
-     *
-     * @var class
-     */
+    /** @var Model|null */
     protected $model;
 
-    /**
-     * Query / conditional untuk pengambilan data
-     * Dalam tiap tiap list array terdapat 3 kolom yaitu `field`, `value`, `strict`
-     * - field	(string)	: kolom yang dicari pada database
-     * - value	(string)	: value yang dicari pada database
-     * - strict (boolean)	: menampilkan hasil yang sama persis atau tidak
-     *
-     * @var array
-     */
+    /** @var array */
     protected $queries = [];
 
-    /**
-     * Menapilkan kolom terpilih
-     * Jika kosong akan menampilkan semua kolom
-     *
-     * @var array
-     */
+    /** @var array */
     protected $columns = [];
 
-    /**
-     * List relasi
-     *
-     * @var array
-     */
-    protected $relations;
+    /** @var array */
+    protected $relations = [];
 
-    /**
-     * List relasi untuk mendapatkan jumlah data
-     *
-     * @var array
-     */
-    protected $relationsCount;
+    /** @var array */
+    protected $relationsCount = [];
 
-    /**
-     * Menampilkan hasil dalam bentuk pagination atau raw
-     *
-     * @var bool
-     */
-    protected $pagination = true;
+    /** @var bool */
+    protected $pagination = false;
 
-    /**
-     * Jumlah data yang akan ditampilkan dalam 1 halaman
-     *
-     * @var int
-     */
+    /** @var int */
     protected $paginationLength = GeneralConfig::PAGINATE_PER_PAGE;
 
-    /**
-     * Jumlah data yang akan ditampilkan
-     *
-     * @var int
-     */
+    /** @var int|null */
     protected $limit;
 
-    /**
-     * Urutan kolom yang akan ditampilkan
-     *
-     * @var string
-     */
+    /** @var string|null */
     protected $order;
 
-    /**
-     * Menampilkan data satuan atau multiple
-     * `many` = menampilkan banyak data
-     * `one` = menampilkan hanya satu data
-     *
-     * @var string
-     */
+    /** @var string|null */
     protected $mode;
 
-    /**
-     * Menampilkan data yang dimiliki user terauthentikasi
-     * @var boolean
-     */
-    protected $authentication;
+    /** @var bool */
+    protected $authentication = false;
 
-    /**
-     * Inisiasi variable
-     * - model				required	Class
-     * - queries			optional	Array
-     * - columns			optional	Array
-     * - pagination			optional	Boolean
-     * - pagination_length	optional	Number
-     * - mode				optional	Enum('first', 'get')
-     */
+    /** Initialize the query definition. */
     public function initial(Collection $request)
     {
-        // Initial variable
+        $this->reset();
         $this->model = $request->get('model');
-        $this->queries = $request->get('queries', []);
-        $this->columns = $request->get('columns', []);
+        $this->queries = (array) $request->get('queries', []);
+        $this->columns = (array) $request->get('columns', []);
         $this->limit = $request->get('limit');
         $this->order = $request->get('order', 'created_at:asc');
-        $this->pagination = $request->get('pagination', false);
-        $this->paginationLength = $request->get('pagination_length', GeneralConfig::PAGINATE_PER_PAGE);
+        $this->pagination = (bool) $request->get('pagination', false);
+        $this->paginationLength = (int) $request->get(
+            'pagination_length',
+            GeneralConfig::PAGINATE_PER_PAGE
+        );
         $this->mode = $request->get('mode');
-        $this->authentication = $request->get('auth');
+        $this->authentication = (bool) $request->get(
+            'authentication',
+            $request->get('auth', false)
+        );
 
         return $this;
     }
 
-    /**
-     * Set jumlah list data yang akan tampil dalam 1 halaman
-     * @param int $pagination
-     */
     public function setPagination($pagination)
     {
-        $this->paginationLength = $pagination;
+        $this->paginationLength = max(1, (int) $pagination);
+        $this->pagination = true;
+
         return $this;
     }
 
-    /**
-     * Menghilangkan pagination dan menampilkan dalam bentuk raw
-     */
     public function unsetPagination()
     {
         $this->pagination = false;
+
         return $this;
     }
 
-    /**
-     * Mengatur list relasi
-     * @param array $relations
-     */
     public function setRelations($relations)
     {
-        if ($relations) {
-            $this->relations = $relations;
-        }
+        $this->relations = $this->normalizeList($relations);
+
         return $this;
     }
 
     public function setRelationsCount($relations)
     {
-        if ($relations) {
-            $this->relationsCount = $relations;
-        }
+        $this->relationsCount = $this->normalizeList($relations);
+
         return $this;
     }
 
-    /**
-     * Membuat query
-     *
-     */
+    /** @return mixed */
     public function create()
     {
         try {
-            $query = $this->model;
-            if (!$query) {
-                throw new ErrorException("Model not found, please initiate it first, use 'initModel()'", 404);
-            }
-
-            // Apply authentication filter FIRST before any other conditions
-            if ($this->authentication) {
-                $query = $query->where('user_id', Helper::getUserID());
-            }
-
-            if ($this->queries) {
-                foreach ($this->queries as $item) {
-                    $item = collect($item);
-                    $value = $item->get('value');
-
-                    // Array/Collection Value - use whereIn
-                    if (is_array($value) || $value instanceof \Illuminate\Support\Collection) {
-                        $query = $query->whereIn($item->get('field'), $value);
-                    }
-                    // Operator "Not Equal"
-                    elseif ($item->get('op') == 'ne') {
-                        if ($item->get('strict')) {
-                            // Exact not equal
-                            $query = $query->where($item->get('field'), '!=', $value);
-                        } else {
-                            // Not equal with LIKE pattern
-                            $query = $query->where($item->get('field'), 'NOT LIKE', "%{$value}%");
-                        }
-                    }
-                    // Basic where (default is LIKE for search)
-                    else {
-                        if ($item->get('strict')) {
-                            // Exact match
-                            $query = $query->where($item->get('field'), '=', $value);
-                        } else {
-                            // LIKE search
-                            $query = $query->where($item->get('field'), 'LIKE', "%{$value}%");
-                        }
-                    }
-                }
-            }
-
-            // Relation
-            $query = $query->when($this->relations, function ($query, $relationsQuery) {
-                $query->with($relationsQuery);
-            });
-
-            // Relation Count
-            $query = $query->when($this->relationsCount, function ($query, $relationsQuery) {
-                $query->withCount($relationsQuery);
-            });
-
-            if ($this->columns) {
-                $query = $query->select(
-                    collect($this->columns)
-                        ->push('id')
-                        ->toArray(),
-                );
-            }
-
-            if ($this->order) {
-                $splitText = explode(':', $this->order); // Contoh text: 'name:asc'
-                $order = [
-                    'field' => $splitText[0] ?? 'created_at',
-                    'mode' => $splitText[1] ?? 'asc',
-                ];
-                $query = $query->orderBy($order['field'], $order['mode']);
-            }
-
-            if ($this->pagination === false) {
-                $this->unsetPagination();
-            }
-
-            if ($this->pagination) {
-                return $query->paginate($this->paginationLength);
-            }
-
-            if ($this->limit) {
-                return $query->limit($this->limit)->get();
-            }
-
-            if ($this->mode === 'first') {
-                return $query->first();
-            }
-
-            if ($this->mode === 'get') {
-                return $query->get();
-            }
-
-            return $query->get();
+            return $this->execute($this->buildQuery());
         } catch (ErrorException $e) {
-            throw new ErrorException($e->getMessage(), $e->getCode());
-        } catch (\Exception $e) {
-            throw new ErrorException($e->getMessage(), $e->getCode());
-        } catch (\PDOException $e) {
-            throw new ErrorException($e->getMessage(), $e->getCode());
+            throw $e;
+        } catch (\Throwable $e) {
+            throw new ErrorException($e->getMessage(), $e->getCode() ?: 500);
         }
+    }
+
+    /** @return Builder */
+    protected function buildQuery()
+    {
+        if (!$this->model instanceof Model) {
+            throw new ErrorException(
+                "Model not found, please initiate it first, use 'initModel()'",
+                404
+            );
+        }
+
+        $query = $this->model->newQuery();
+        $query = $this->applyAuthentication($query);
+        $query = $this->applyFilters($query);
+        $query = $this->applyRelations($query);
+        $query = $this->applyColumns($query);
+
+        return $this->applyOrder($query);
+    }
+
+    /** @param Builder $query */
+    protected function applyAuthentication(Builder $query)
+    {
+        if ($this->authentication) {
+            $query->where('user_id', Helper::getUserID());
+        }
+
+        return $query;
+    }
+
+    /** @param Builder $query */
+    protected function applyFilters(Builder $query)
+    {
+        foreach ($this->queries as $definition) {
+            $filter = collect($definition);
+            $field = $filter->get('field');
+            $this->assertAllowedField($field);
+            $query = $this->applyFilter($query, $field, $filter);
+        }
+
+        return $query;
+    }
+
+    /** @param Builder $query */
+    protected function applyFilter(Builder $query, $field, Collection $filter)
+    {
+        $operator = strtolower((string) $filter->get('op', ''));
+        $value = $filter->get('value');
+
+        if ($operator === '') {
+            return $this->applyDefaultFilter($query, $field, $value, $filter);
+        }
+
+        switch ($operator) {
+            case 'eq':
+                return $query->where($field, '=', $value);
+            case 'ne':
+                return $query->where($field, '!=', $value);
+            case 'gt':
+                return $query->where($field, '>', $value);
+            case 'gte':
+                return $query->where($field, '>=', $value);
+            case 'lt':
+                return $query->where($field, '<', $value);
+            case 'lte':
+                return $query->where($field, '<=', $value);
+            case 'like':
+                return $query->where($field, 'LIKE', "%{$value}%");
+            case 'not_like':
+                return $query->where($field, 'NOT LIKE', "%{$value}%");
+            case 'begins_with':
+                return $query->where($field, 'LIKE', "{$value}%");
+            case 'ends_with':
+                return $query->where($field, 'LIKE', "%{$value}");
+            case 'in':
+                return $query->whereIn($field, $this->asList($value));
+            case 'not_in':
+                return $query->whereNotIn($field, $this->asList($value));
+            case 'between':
+                return $query->whereBetween($field, $this->asRange($value));
+            case 'not_between':
+                return $query->whereNotBetween($field, $this->asRange($value));
+            case 'null':
+                return $query->whereNull($field);
+            case 'not_null':
+                return $query->whereNotNull($field);
+            default:
+                throw new ErrorException("Unsupported query operator: {$operator}", 422);
+        }
+    }
+
+    /** @param Builder $query */
+    protected function applyDefaultFilter(Builder $query, $field, $value, Collection $filter)
+    {
+        if (is_array($value) || $value instanceof Collection) {
+            return $query->whereIn($field, $this->asList($value));
+        }
+
+        if ((bool) $filter->get('strict', false)) {
+            return $query->where($field, '=', $value);
+        }
+
+        return $query->where($field, 'LIKE', "%{$value}%");
+    }
+
+    protected function asList($value)
+    {
+        $list = $value instanceof Collection ? $value->all() : (array) $value;
+
+        if (!$list) {
+            throw new ErrorException('Operator requires a non-empty list', 422);
+        }
+
+        return array_values($list);
+    }
+
+    protected function asRange($value)
+    {
+        $range = $this->asList($value);
+        if (count($range) !== 2) {
+            throw new ErrorException('Between operator requires exactly two values', 422);
+        }
+
+        return $range;
+    }
+
+    /** @param Builder $query */
+    protected function applyRelations(Builder $query)
+    {
+        if ($this->relations) {
+            $query->with($this->relations);
+        }
+
+        if ($this->relationsCount) {
+            $query->withCount($this->relationsCount);
+        }
+
+        return $query;
+    }
+
+    /** @param Builder $query */
+    protected function applyColumns(Builder $query)
+    {
+        if ($this->columns) {
+            $columns = array_unique(array_merge($this->columns, [$this->model->getKeyName()]));
+            $query->select($columns);
+        }
+
+        return $query;
+    }
+
+    /** @param Builder $query */
+    protected function applyOrder(Builder $query)
+    {
+        if (!$this->order) {
+            return $query;
+        }
+
+        list($field, $direction) = array_pad(explode(':', $this->order, 2), 2, 'asc');
+        $direction = strtolower($direction ?: 'asc');
+        $this->assertAllowedField($field);
+
+        if (!in_array($direction, ['asc', 'desc'], true)) {
+            throw new ErrorException('Invalid order direction', 422);
+        }
+
+        return $query->orderBy($field, $direction);
+    }
+
+    /** @param Builder $query */
+    protected function execute(Builder $query)
+    {
+        if ($this->pagination) {
+            return $query->paginate(max(1, $this->paginationLength));
+        }
+
+        if ($this->limit !== null) {
+            return $query->limit(max(0, (int) $this->limit))->get();
+        }
+
+        if ($this->mode === 'first') {
+            return $query->first();
+        }
+
+        return $query->get();
+    }
+
+    protected function assertAllowedField($field)
+    {
+        if (!config('laravel-instant.query.reject_unknown_fields', true)) {
+            return;
+        }
+
+        $allowed = array_merge(
+            (array) $this->model->getFillable(),
+            [$this->model->getKeyName(), 'created_at', 'updated_at', 'deleted_at']
+        );
+
+        if (!$field || !in_array($field, array_unique($allowed), true)) {
+            throw new ErrorException('Invalid query field', 422);
+        }
+    }
+
+    protected function normalizeList($value)
+    {
+        if ($value instanceof Collection) {
+            return $value->values()->all();
+        }
+
+        return array_values(array_filter((array) $value));
+    }
+
+    protected function reset()
+    {
+        $this->model = null;
+        $this->queries = [];
+        $this->columns = [];
+        $this->relations = [];
+        $this->relationsCount = [];
+        $this->pagination = false;
+        $this->paginationLength = GeneralConfig::PAGINATE_PER_PAGE;
+        $this->limit = null;
+        $this->order = null;
+        $this->mode = null;
+        $this->authentication = false;
     }
 }

@@ -1,7 +1,7 @@
 <?php
 namespace Diatria\LaravelInstant\Services;
 
-use App\Models\Role;
+use Diatria\LaravelInstant\Models\Role;
 use Diatria\LaravelInstant\Http\Responses\RoleResponse;
 use Diatria\LaravelInstant\Traits\InstantServiceTrait;
 

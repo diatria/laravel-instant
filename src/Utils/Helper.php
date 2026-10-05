@@ -62,7 +62,7 @@ class Helper
      * formatting date to indonesia format
      * @param String $date
      */
-    static function dateIndonesia($date): string|null
+    static function dateIndonesia($date): ?string
     {
         if (empty($date)) {
             return null;

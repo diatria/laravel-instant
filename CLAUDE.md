@@ -196,7 +196,15 @@ DELETE /api/products
 queries[0][field] = 'name'        // Column name
 queries[0][value] = 'Product'     // Search value
 queries[0][strict] = false        // false = LIKE search, true = exact match
-queries[0][op] = 'ne'            // Optional: 'ne' for not equal
+queries[0][op] = 'ne'            // Optional query operator
+
+Supported operators:
+- `eq`, `ne`: equals / not equals
+- `gt`, `gte`, `lt`, `lte`: numeric/date comparison
+- `like`, `not_like`, `begins_with`, `ends_with`: text matching
+- `in`, `not_in`: value must be an array
+- `between`, `not_between`: value must contain exactly two items
+- `null`, `not_null`: checks NULL without requiring a value
 ```
 
 ## Advanced Service Usage

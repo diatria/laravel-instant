@@ -1,14 +1,16 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\LaravelInstant;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class RolePermission extends Model
 {
-    use HasFactory, HasUuids;
+    use HasFactory;
+
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     protected $fillable = [
         "role_id",

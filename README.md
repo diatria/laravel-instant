@@ -6,6 +6,14 @@
 
 Laravel Instant adalah package Laravel yang mempermudah dan mempercepat pembuatan CRUD module dengan menyediakan Trait dan Command Generator yang siap pakai. Package ini mengurangi boilerplate code hingga 70% dan memberikan struktur yang konsisten untuk Controller dan Service layer.
 
+## Compatibility
+
+- PHP 7.4 atau lebih baru
+- Laravel 6, 7, dan 8
+- Carbon 2.x
+
+Laravel 6 tetap membutuhkan konfigurasi aplikasi Laravel yang sesuai dengan versi PHP yang digunakan. Package ini mendukung `firebase/php-jwt` versi 5 dan 6.
+
 ## ✨ Fitur Utama
 
 - 🚀 **Instant CRUD Operations** - Method CRUD lengkap tanpa menulis boilerplate
@@ -73,7 +81,7 @@ Setelah instalasi, publish file-file yang diperlukan:
 # Publish config file
 php artisan vendor:publish --tag=li-config
 
-# Publish models (User, Role, Permission, RolePermission)
+# Publish models (User, Role, Permission, RolePermission) ke app/Models/LaravelInstant
 php artisan vendor:publish --tag=li-model
 
 # Publish migrations
@@ -85,6 +93,40 @@ php artisan vendor:publish --tag=li-seeder
 # 🤖 Publish AI documentation (CLAUDE.md untuk AI assistants)
 php artisan vendor:publish --tag=li-docs
 ```
+
+Route dan migration bawaan package bersifat opt-in. Setelah publish config, aktifkan hanya bila memang diperlukan:
+
+```php
+// config/laravel-instant.php
+'route' => [
+    'enabled' => true,
+    'prefix' => 'api',
+    'middleware' => ['api'],
+],
+'database' => [
+    'migrations' => ['enabled' => true],
+],
+```
+
+Dokumentasi AI dipublish ke `laravel-instant.md` agar tidak menimpa `CLAUDE.md` milik aplikasi.
+
+### Menjalankan quality checks
+
+```bash
+composer validate
+composer test
+composer analyse
+```
+
+Pull request dan push akan menjalankan pemeriksaan tersebut melalui GitHub Actions pada PHP 7.4, 8.0, dan 8.1.
+
+Jika PHP dan Composer belum tersedia di mesin lokal, gunakan Docker:
+
+```bash
+docker compose run --rm package-test
+```
+
+Perintah tersebut akan meng-install dependency, memvalidasi Composer, menjalankan PHPUnit, dan menjalankan PHPStan pada PHP 7.4.
 
 ## 🤖 AI Assistant Support
 
@@ -285,7 +327,7 @@ GET /api/products/table?queries[0][field]=status&queries[0][value]=active&querie
 | `field` | string | Column name to filter |
 | `value` | mixed | Value to search |
 | `strict` | boolean | `true` = exact match, `false` = LIKE search |
-| `op` | string | Operator: `ne` for not equal |
+| `op` | string | `eq`, `ne`, `gt`, `gte`, `lt`, `lte`, `like`, `not_like`, `begins_with`, `ends_with`, `in`, `not_in`, `between`, `not_between`, `null`, `not_null` |
 
 ### Complete Example
 

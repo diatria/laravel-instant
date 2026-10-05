@@ -40,7 +40,7 @@ class ResponseFormat
         }
     }
 
-    public function object(object|array|null $fieldObject)
+    public function object($fieldObject)
     {
         try {
             $this->field = Helper::toObject($fieldObject);

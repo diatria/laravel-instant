@@ -1,0 +1,616 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Call to an undefined static method Illuminate\\\\Support\\\\Arr\\:\\:take\\(\\)\\.$#"
+			count: 1
+			path: src/Console/Commands/MakeControllerCommand.php
+
+		-
+			message: "#^Static method Illuminate\\\\Support\\\\Str\\:\\:slug\\(\\) invoked with 4 parameters, 1\\-3 required\\.$#"
+			count: 1
+			path: src/Console/Commands/MakeServiceCommand.php
+
+		-
+			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$id\\.$#"
+			count: 3
+			path: src/Http/Controllers/PermissionController.php
+
+		-
+			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$relations\\.$#"
+			count: 1
+			path: src/Http/Controllers/PermissionController.php
+
+		-
+			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$relations_count\\.$#"
+			count: 1
+			path: src/Http/Controllers/PermissionController.php
+
+		-
+			message: "#^Method Diatria\\\\LaravelInstant\\\\Services\\\\PermissionService\\:\\:initModel\\(\\) invoked with 1 parameter, 0 required\\.$#"
+			count: 1
+			path: src/Http/Controllers/PermissionController.php
+
+		-
+			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$id\\.$#"
+			count: 3
+			path: src/Http/Controllers/RoleController.php
+
+		-
+			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$relations\\.$#"
+			count: 1
+			path: src/Http/Controllers/RoleController.php
+
+		-
+			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$relations_count\\.$#"
+			count: 1
+			path: src/Http/Controllers/RoleController.php
+
+		-
+			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$id\\.$#"
+			count: 3
+			path: src/Http/Controllers/RolePermissionController.php
+
+		-
+			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$queries\\.$#"
+			count: 1
+			path: src/Http/Controllers/RolePermissionController.php
+
+		-
+			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$relations\\.$#"
+			count: 1
+			path: src/Http/Controllers/RolePermissionController.php
+
+		-
+			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$relations_count\\.$#"
+			count: 1
+			path: src/Http/Controllers/RolePermissionController.php
+
+		-
+			message: "#^Method Diatria\\\\LaravelInstant\\\\Services\\\\RolePermissionService\\:\\:initModel\\(\\) invoked with 1 parameter, 0 required\\.$#"
+			count: 1
+			path: src/Http/Controllers/RolePermissionController.php
+
+		-
+			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$email\\.$#"
+			count: 2
+			path: src/Http/Controllers/UserController.php
+
+		-
+			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$id\\.$#"
+			count: 3
+			path: src/Http/Controllers/UserController.php
+
+		-
+			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$name\\.$#"
+			count: 1
+			path: src/Http/Controllers/UserController.php
+
+		-
+			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$password\\.$#"
+			count: 2
+			path: src/Http/Controllers/UserController.php
+
+		-
+			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$phone_number\\.$#"
+			count: 1
+			path: src/Http/Controllers/UserController.php
+
+		-
+			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$refresh_token\\.$#"
+			count: 1
+			path: src/Http/Controllers/UserController.php
+
+		-
+			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$relations\\.$#"
+			count: 1
+			path: src/Http/Controllers/UserController.php
+
+		-
+			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$relations_count\\.$#"
+			count: 1
+			path: src/Http/Controllers/UserController.php
+
+		-
+			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$role_id\\.$#"
+			count: 1
+			path: src/Http/Controllers/UserController.php
+
+		-
+			message: "#^Method Diatria\\\\LaravelInstant\\\\Services\\\\UserService\\:\\:initModel\\(\\) invoked with 1 parameter, 0 required\\.$#"
+			count: 1
+			path: src/Http/Controllers/UserController.php
+
+		-
+			message: "#^Call to an undefined method Diatria\\\\LaravelInstant\\\\LaravelInstantServiceProvider\\:\\:publishesMigrations\\(\\)\\.$#"
+			count: 1
+			path: src/LaravelInstantServiceProvider.php
+
+		-
+			message: "#^Access to an undefined property Diatria\\\\LaravelInstant\\\\Models\\\\User\\:\\:\\$role_id\\.$#"
+			count: 1
+			path: src/Models/User.php
+
+		-
+			message: "#^Call to an undefined static method Diatria\\\\LaravelInstant\\\\Models\\\\RolePermission\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: src/Models/User.php
+
+		-
+			message: "#^Call to method create\\(\\) on an unknown class Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\Permission\\.$#"
+			count: 1
+			path: src/Services/PermissionService.php
+
+		-
+			message: "#^Call to method destroy\\(\\) on an unknown class Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\Permission\\.$#"
+			count: 1
+			path: src/Services/PermissionService.php
+
+		-
+			message: "#^Call to method find\\(\\) on an unknown class Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\Permission\\.$#"
+			count: 3
+			path: src/Services/PermissionService.php
+
+		-
+			message: "#^Call to method firstOrCreate\\(\\) on an unknown class Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\Permission\\.$#"
+			count: 1
+			path: src/Services/PermissionService.php
+
+		-
+			message: "#^Call to method get\\(\\) on an unknown class Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\Permission\\.$#"
+			count: 1
+			path: src/Services/PermissionService.php
+
+		-
+			message: "#^Call to method getFillable\\(\\) on an unknown class Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\Permission\\.$#"
+			count: 1
+			path: src/Services/PermissionService.php
+
+		-
+			message: "#^Call to method getTable\\(\\) on an unknown class Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\Permission\\.$#"
+			count: 1
+			path: src/Services/PermissionService.php
+
+		-
+			message: "#^Call to method toArray\\(\\) on an unknown class Diatria\\\\LaravelInstant\\\\Traits\\\\TValue\\.$#"
+			count: 1
+			path: src/Services/PermissionService.php
+
+		-
+			message: "#^Call to method where\\(\\) on an unknown class Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\Permission\\.$#"
+			count: 3
+			path: src/Services/PermissionService.php
+
+		-
+			message: "#^If condition is always true\\.$#"
+			count: 2
+			path: src/Services/PermissionService.php
+
+		-
+			message: "#^Method Diatria\\\\LaravelInstant\\\\Services\\\\PermissionService\\:\\:query\\(\\) has invalid return type Diatria\\\\LaravelInstant\\\\Traits\\\\TValue\\.$#"
+			count: 1
+			path: src/Services/PermissionService.php
+
+		-
+			message: "#^Offset 'disable_duplicate…' on array\\{disable_duplicate_ref_id\\: string\\} in isset\\(\\) always exists and is not nullable\\.$#"
+			count: 1
+			path: src/Services/PermissionService.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$model$#"
+			count: 1
+			path: src/Services/PermissionService.php
+
+		-
+			message: "#^Parameter \\#1 \\$model of static method Diatria\\\\LaravelInstant\\\\Utils\\\\Helper\\:\\:appendUserID\\(\\) expects Illuminate\\\\Database\\\\Eloquent\\\\Model, Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\Permission given\\.$#"
+			count: 1
+			path: src/Services/PermissionService.php
+
+		-
+			message: "#^Property Diatria\\\\LaravelInstant\\\\Services\\\\PermissionService\\:\\:\\$model \\(Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\Permission\\) does not accept Diatria\\\\LaravelInstant\\\\Models\\\\Permission\\.$#"
+			count: 1
+			path: src/Services/PermissionService.php
+
+		-
+			message: "#^Property Diatria\\\\LaravelInstant\\\\Services\\\\PermissionService\\:\\:\\$model has unknown class Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\Permission as its type\\.$#"
+			count: 1
+			path: src/Services/PermissionService.php
+
+		-
+			message: "#^Property Diatria\\\\LaravelInstant\\\\Services\\\\PermissionService\\:\\:\\$paginationPath \\(string\\) on left side of \\?\\? is not nullable\\.$#"
+			count: 2
+			path: src/Services/PermissionService.php
+
+		-
+			message: "#^Call to an undefined static method Diatria\\\\LaravelInstant\\\\Models\\\\Permission\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: src/Services/RolePermissionService.php
+
+		-
+			message: "#^Call to method create\\(\\) on an unknown class Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\RolePermission\\.$#"
+			count: 1
+			path: src/Services/RolePermissionService.php
+
+		-
+			message: "#^Call to method destroy\\(\\) on an unknown class Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\RolePermission\\.$#"
+			count: 1
+			path: src/Services/RolePermissionService.php
+
+		-
+			message: "#^Call to method find\\(\\) on an unknown class Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\RolePermission\\.$#"
+			count: 3
+			path: src/Services/RolePermissionService.php
+
+		-
+			message: "#^Call to method firstOrCreate\\(\\) on an unknown class Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\RolePermission\\.$#"
+			count: 1
+			path: src/Services/RolePermissionService.php
+
+		-
+			message: "#^Call to method getFillable\\(\\) on an unknown class Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\RolePermission\\.$#"
+			count: 1
+			path: src/Services/RolePermissionService.php
+
+		-
+			message: "#^Call to method getTable\\(\\) on an unknown class Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\RolePermission\\.$#"
+			count: 1
+			path: src/Services/RolePermissionService.php
+
+		-
+			message: "#^Call to method toArray\\(\\) on an unknown class Diatria\\\\LaravelInstant\\\\Traits\\\\TValue\\.$#"
+			count: 1
+			path: src/Services/RolePermissionService.php
+
+		-
+			message: "#^Call to method where\\(\\) on an unknown class Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\RolePermission\\.$#"
+			count: 4
+			path: src/Services/RolePermissionService.php
+
+		-
+			message: "#^Call to method with\\(\\) on an unknown class Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\RolePermission\\.$#"
+			count: 1
+			path: src/Services/RolePermissionService.php
+
+		-
+			message: "#^If condition is always true\\.$#"
+			count: 2
+			path: src/Services/RolePermissionService.php
+
+		-
+			message: "#^Method Diatria\\\\LaravelInstant\\\\Services\\\\RolePermissionService\\:\\:query\\(\\) has invalid return type Diatria\\\\LaravelInstant\\\\Traits\\\\TValue\\.$#"
+			count: 1
+			path: src/Services/RolePermissionService.php
+
+		-
+			message: "#^Offset 'disable_duplicate…' on array\\{disable_duplicate_ref_id\\: string\\} in isset\\(\\) always exists and is not nullable\\.$#"
+			count: 1
+			path: src/Services/RolePermissionService.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$model$#"
+			count: 1
+			path: src/Services/RolePermissionService.php
+
+		-
+			message: "#^Parameter \\#1 \\$model of static method Diatria\\\\LaravelInstant\\\\Utils\\\\Helper\\:\\:appendUserID\\(\\) expects Illuminate\\\\Database\\\\Eloquent\\\\Model, Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\RolePermission given\\.$#"
+			count: 1
+			path: src/Services/RolePermissionService.php
+
+		-
+			message: "#^Property Diatria\\\\LaravelInstant\\\\Services\\\\RolePermissionService\\:\\:\\$model \\(Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\RolePermission\\) does not accept Diatria\\\\LaravelInstant\\\\Models\\\\RolePermission\\.$#"
+			count: 1
+			path: src/Services/RolePermissionService.php
+
+		-
+			message: "#^Property Diatria\\\\LaravelInstant\\\\Services\\\\RolePermissionService\\:\\:\\$model has unknown class Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\RolePermission as its type\\.$#"
+			count: 1
+			path: src/Services/RolePermissionService.php
+
+		-
+			message: "#^Property Diatria\\\\LaravelInstant\\\\Services\\\\RolePermissionService\\:\\:\\$paginationPath \\(string\\) on left side of \\?\\? is not nullable\\.$#"
+			count: 2
+			path: src/Services/RolePermissionService.php
+
+		-
+			message: "#^Call to method create\\(\\) on an unknown class Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\Role\\.$#"
+			count: 1
+			path: src/Services/RoleService.php
+
+		-
+			message: "#^Call to method destroy\\(\\) on an unknown class Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\Role\\.$#"
+			count: 1
+			path: src/Services/RoleService.php
+
+		-
+			message: "#^Call to method find\\(\\) on an unknown class Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\Role\\.$#"
+			count: 3
+			path: src/Services/RoleService.php
+
+		-
+			message: "#^Call to method firstOrCreate\\(\\) on an unknown class Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\Role\\.$#"
+			count: 1
+			path: src/Services/RoleService.php
+
+		-
+			message: "#^Call to method getFillable\\(\\) on an unknown class Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\Role\\.$#"
+			count: 1
+			path: src/Services/RoleService.php
+
+		-
+			message: "#^Call to method getTable\\(\\) on an unknown class Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\Role\\.$#"
+			count: 1
+			path: src/Services/RoleService.php
+
+		-
+			message: "#^Call to method toArray\\(\\) on an unknown class Diatria\\\\LaravelInstant\\\\Traits\\\\TValue\\.$#"
+			count: 1
+			path: src/Services/RoleService.php
+
+		-
+			message: "#^Call to method where\\(\\) on an unknown class Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\Role\\.$#"
+			count: 3
+			path: src/Services/RoleService.php
+
+		-
+			message: "#^If condition is always true\\.$#"
+			count: 2
+			path: src/Services/RoleService.php
+
+		-
+			message: "#^Method Diatria\\\\LaravelInstant\\\\Services\\\\RoleService\\:\\:query\\(\\) has invalid return type Diatria\\\\LaravelInstant\\\\Traits\\\\TValue\\.$#"
+			count: 1
+			path: src/Services/RoleService.php
+
+		-
+			message: "#^Offset 'disable_duplicate…' on array\\{disable_duplicate_ref_id\\: string\\} in isset\\(\\) always exists and is not nullable\\.$#"
+			count: 1
+			path: src/Services/RoleService.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$model$#"
+			count: 1
+			path: src/Services/RoleService.php
+
+		-
+			message: "#^Parameter \\#1 \\$model of static method Diatria\\\\LaravelInstant\\\\Utils\\\\Helper\\:\\:appendUserID\\(\\) expects Illuminate\\\\Database\\\\Eloquent\\\\Model, Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\Role given\\.$#"
+			count: 1
+			path: src/Services/RoleService.php
+
+		-
+			message: "#^Property Diatria\\\\LaravelInstant\\\\Services\\\\RoleService\\:\\:\\$model \\(Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\Role\\) does not accept Diatria\\\\LaravelInstant\\\\Models\\\\Role\\.$#"
+			count: 1
+			path: src/Services/RoleService.php
+
+		-
+			message: "#^Property Diatria\\\\LaravelInstant\\\\Services\\\\RoleService\\:\\:\\$model has unknown class Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\Role as its type\\.$#"
+			count: 1
+			path: src/Services/RoleService.php
+
+		-
+			message: "#^Property Diatria\\\\LaravelInstant\\\\Services\\\\RoleService\\:\\:\\$paginationPath \\(string\\) on left side of \\?\\? is not nullable\\.$#"
+			count: 2
+			path: src/Services/RoleService.php
+
+		-
+			message: "#^Call to method create\\(\\) on an unknown class Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\User\\.$#"
+			count: 1
+			path: src/Services/UserService.php
+
+		-
+			message: "#^Call to method destroy\\(\\) on an unknown class Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\User\\.$#"
+			count: 1
+			path: src/Services/UserService.php
+
+		-
+			message: "#^Call to method find\\(\\) on an unknown class Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\User\\.$#"
+			count: 3
+			path: src/Services/UserService.php
+
+		-
+			message: "#^Call to method firstOrCreate\\(\\) on an unknown class Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\User\\.$#"
+			count: 1
+			path: src/Services/UserService.php
+
+		-
+			message: "#^Call to method getFillable\\(\\) on an unknown class Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\User\\.$#"
+			count: 1
+			path: src/Services/UserService.php
+
+		-
+			message: "#^Call to method getTable\\(\\) on an unknown class Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\User\\.$#"
+			count: 1
+			path: src/Services/UserService.php
+
+		-
+			message: "#^Call to method toArray\\(\\) on an unknown class Diatria\\\\LaravelInstant\\\\Traits\\\\TValue\\.$#"
+			count: 1
+			path: src/Services/UserService.php
+
+		-
+			message: "#^Call to method where\\(\\) on an unknown class Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\User\\.$#"
+			count: 5
+			path: src/Services/UserService.php
+
+		-
+			message: "#^If condition is always true\\.$#"
+			count: 2
+			path: src/Services/UserService.php
+
+		-
+			message: "#^Left side of && is always true\\.$#"
+			count: 1
+			path: src/Services/UserService.php
+
+		-
+			message: "#^Method Diatria\\\\LaravelInstant\\\\Services\\\\UserService\\:\\:query\\(\\) has invalid return type Diatria\\\\LaravelInstant\\\\Traits\\\\TValue\\.$#"
+			count: 1
+			path: src/Services/UserService.php
+
+		-
+			message: "#^Offset 'disable_duplicate…' on array\\{disable_duplicate_ref_id\\: string\\} in isset\\(\\) always exists and is not nullable\\.$#"
+			count: 1
+			path: src/Services/UserService.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$model$#"
+			count: 1
+			path: src/Services/UserService.php
+
+		-
+			message: "#^Parameter \\#1 \\$model of static method Diatria\\\\LaravelInstant\\\\Utils\\\\Helper\\:\\:appendUserID\\(\\) expects Illuminate\\\\Database\\\\Eloquent\\\\Model, Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\User given\\.$#"
+			count: 1
+			path: src/Services/UserService.php
+
+		-
+			message: "#^Property Diatria\\\\LaravelInstant\\\\Services\\\\UserService\\:\\:\\$model \\(Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\User\\) does not accept Diatria\\\\LaravelInstant\\\\Models\\\\User\\.$#"
+			count: 1
+			path: src/Services/UserService.php
+
+		-
+			message: "#^Property Diatria\\\\LaravelInstant\\\\Services\\\\UserService\\:\\:\\$model has unknown class Diatria\\\\LaravelInstant\\\\Services\\\\Diatria\\\\LaravelInstant\\\\Models\\\\User as its type\\.$#"
+			count: 1
+			path: src/Services/UserService.php
+
+		-
+			message: "#^Property Diatria\\\\LaravelInstant\\\\Services\\\\UserService\\:\\:\\$paginationPath \\(string\\) on left side of \\?\\? is not nullable\\.$#"
+			count: 2
+			path: src/Services/UserService.php
+
+		-
+			message: "#^Call to an undefined method Illuminate\\\\Contracts\\\\Filesystem\\\\Filesystem\\:\\:url\\(\\)\\.$#"
+			count: 1
+			path: src/Utils/FileUpload.php
+
+		-
+			message: "#^Call to static method error\\(\\) on an unknown class App\\\\Utils\\\\Response\\.$#"
+			count: 3
+			path: src/Utils/HandleToken.php
+
+		-
+			message: "#^Parameter \\#3 \\$headers of static method Firebase\\\\JWT\\\\JWT\\:\\:decode\\(\\) is passed by reference, so it expects variables only\\.$#"
+			count: 1
+			path: src/Utils/HandleToken.php
+
+		-
+			message: "#^Access to an undefined property Illuminate\\\\Contracts\\\\Auth\\\\Authenticatable\\:\\:\\$id\\.$#"
+			count: 1
+			path: src/Utils/Helper.php
+
+		-
+			message: "#^Call to an undefined static method Diatria\\\\LaravelInstant\\\\Utils\\\\Token\\:\\:getToken\\(\\)\\.$#"
+			count: 1
+			path: src/Utils/Helper.php
+
+		-
+			message: "#^Expression on left side of \\?\\? is not nullable\\.$#"
+			count: 1
+			path: src/Utils/Helper.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(Integer Bytes\\)\\: Unexpected token \"Bytes\", expected variable at offset 26$#"
+			count: 1
+			path: src/Utils/Helper.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$fillable$#"
+			count: 1
+			path: src/Utils/Helper.php
+
+		-
+			message: "#^Expression on left side of \\?\\? is not nullable\\.$#"
+			count: 1
+			path: src/Utils/Response.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(Array\\|Any data\\)\\: Unexpected token \"data\", expected variable at offset 54$#"
+			count: 1
+			path: src/Utils/Response.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(Number code\\)\\: Unexpected token \"code\", expected variable at offset 25$#"
+			count: 1
+			path: src/Utils/Response.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(String message\\)\\: Unexpected token \"message\", expected variable at offset 80$#"
+			count: 1
+			path: src/Utils/Response.php
+
+		-
+			message: "#^Access to an undefined property Diatria\\\\LaravelInstant\\\\Utils\\\\ResponseFormat\\:\\:\\$columns\\.$#"
+			count: 1
+			path: src/Utils/ResponseFormat.php
+
+		-
+			message: "#^Access to an undefined property Diatria\\\\LaravelInstant\\\\Utils\\\\ResponseFormat\\:\\:\\$columnsRequired\\.$#"
+			count: 2
+			path: src/Utils/ResponseFormat.php
+
+		-
+			message: "#^Access to an undefined property Diatria\\\\LaravelInstant\\\\Utils\\\\ResponseFormat\\:\\:\\$model\\.$#"
+			count: 13
+			path: src/Utils/ResponseFormat.php
+
+		-
+			message: "#^Call to method toArray\\(\\) on an unknown class Diatria\\\\LaravelInstant\\\\Traits\\\\TValue\\.$#"
+			count: 1
+			path: src/Utils/ResponseFormat.php
+
+		-
+			message: "#^Dead catch \\- Diatria\\\\LaravelInstant\\\\Utils\\\\ErrorException is never thrown in the try block\\.$#"
+			count: 2
+			path: src/Utils/ResponseFormat.php
+
+		-
+			message: "#^Dead catch \\- Exception is never thrown in the try block\\.$#"
+			count: 2
+			path: src/Utils/ResponseFormat.php
+
+		-
+			message: "#^If condition is always true\\.$#"
+			count: 2
+			path: src/Utils/ResponseFormat.php
+
+		-
+			message: "#^Method Diatria\\\\LaravelInstant\\\\Utils\\\\ResponseFormat\\:\\:query\\(\\) has invalid return type Diatria\\\\LaravelInstant\\\\Traits\\\\TValue\\.$#"
+			count: 1
+			path: src/Utils/ResponseFormat.php
+
+		-
+			message: "#^Offset 'disable_duplicate…' on array\\{disable_duplicate_ref_id\\: string\\} in isset\\(\\) always exists and is not nullable\\.$#"
+			count: 1
+			path: src/Utils/ResponseFormat.php
+
+		-
+			message: "#^Dead catch \\- Exception is never thrown in the try block\\.$#"
+			count: 1
+			path: src/Utils/ThrowError.php
+
+		-
+			message: "#^Expression on left side of \\?\\? is not nullable\\.$#"
+			count: 1
+			path: src/Utils/Token.php
+
+		-
+			message: "#^If condition is always true\\.$#"
+			count: 1
+			path: src/Utils/Token.php
+
+		-
+			message: "#^Method Diatria\\\\LaravelInstant\\\\Utils\\\\Token\\:\\:authConfig\\(\\) with return type void returns \\$this\\(Diatria\\\\LaravelInstant\\\\Utils\\\\Token\\) but should not return anything\\.$#"
+			count: 1
+			path: src/Utils/Token.php
+
+		-
+			message: "#^Parameter \\#2 \\$keyOrKeyArray of static method Firebase\\\\JWT\\\\JWT\\:\\:decode\\(\\) expects array\\<string, Firebase\\\\JWT\\\\Key\\>\\|ArrayAccess\\<string, Firebase\\\\JWT\\\\Key\\>\\|Firebase\\\\JWT\\\\Key, string\\|null given\\.$#"
+			count: 1
+			path: src/Utils/Token.php
+
+		-
+			message: "#^Parameter \\#3 \\$headers of static method Firebase\\\\JWT\\\\JWT\\:\\:decode\\(\\) is passed by reference, so it expects variables only\\.$#"
+			count: 1
+			path: src/Utils/Token.php
+
+		-
+			message: "#^Unreachable statement \\- code above always terminates\\.$#"
+			count: 1
+			path: src/Utils/Token.php

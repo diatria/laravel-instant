@@ -106,6 +106,7 @@ class Token
      */
     public function generateAccessToken(array $payload)
     {
+        $this->ensureSecretKey();
         $token = JWT::encode(
             [
                 'iss' => $this->issuer, // Issuer (pihak yang mengeluarkan token)
@@ -132,6 +133,7 @@ class Token
      */
     public function generateRefreshToken(array $payload)
     {
+        $this->ensureSecretKey();
         $token = JWT::encode(
             [
                 'iss' => $this->issuer, // Issuer (pihak yang mengeluarkan token)
@@ -257,27 +259,18 @@ class Token
         try {
             // Verifikasi string token
             if ($token) {
-                $decoded = JWT::decode(
-                    $token,
-                    new Key($this->secretKey, $this->algorithm),
-                );
+                $decoded = $this->decode($token);
 
                 return Helper::toArray($decoded) ?? [];
             }
 
             // Verifikasi token dari cookies
-            $decoded = JWT::decode(
-                $this->getAccessToken(),
-                new Key($this->secretKey, $this->algorithm),
-            );
+            $decoded = $this->decode($this->getAccessToken());
 
             return Helper::toArray($decoded) ?? [];
         } catch (ExpiredException $e) {
             try {
-                $decoded = JWT::decode(
-                    $this->getRefreshToken(),
-                    new Key($this->secretKey, $this->algorithm),
-                );
+                $decoded = $this->decode($this->getRefreshToken());
                 if ($decoded) {
                     return $this->create(Helper::toArray($decoded));
                 }
@@ -288,6 +281,28 @@ class Token
             throw new ErrorException('Token has expired', 401);
         } catch (\Exception $e) {
             throw new ErrorException('Token verification failed', 401);
+        }
+    }
+
+    /**
+     * Decode JWT tokens for firebase/php-jwt v5 and v6.
+     *
+     * @return object
+     */
+    private function decode(string $token)
+    {
+        $this->ensureSecretKey();
+        if (class_exists(Key::class)) {
+            return JWT::decode($token, new Key($this->secretKey, $this->algorithm));
+        }
+
+        return JWT::decode($token, $this->secretKey, [$this->algorithm]);
+    }
+
+    private function ensureSecretKey(): void
+    {
+        if (empty($this->secretKey)) {
+            throw new ErrorException('LI_SECRET_KEY is required when JWT authentication is enabled', 500);
         }
     }
 }

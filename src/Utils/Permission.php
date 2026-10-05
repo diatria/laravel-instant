@@ -2,7 +2,6 @@
 
 namespace Diatria\LaravelInstant\Utils;
 
-use Diatria\LaravelInstant\Models\User;
 use Firebase\JWT\SignatureInvalidException;
 
 class Permission
@@ -26,7 +25,8 @@ class Permission
             $this->action = $action;
 
             $token = (new Token)->verification();
-            $user = User::where('uuid', Helper::get($token, 'uuid'))->first();
+            $userModel = config('laravel-instant.models.user', \Diatria\LaravelInstant\Models\User::class);
+            $user = $userModel::where('uuid', Helper::get($token, 'uuid'))->first();
 
             if (! $user) {
                 throw new ErrorException('Unauthorized', 401);
