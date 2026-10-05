@@ -23,7 +23,7 @@ trait InstantServiceTrait
     {
         try {
             if ($params) {
-                $params->only(['relations']);
+                $params->only(['relations', 'relationCount']);
 
                 // displays data along with relationships
                 $params->put('relations', $params->get('relations', $this->responseFormatRelations ?? []));
@@ -135,6 +135,9 @@ trait InstantServiceTrait
             if ($request->get('relations')) {
                 $query = $query->setRelations($request->get('relations'));
             }
+            if ($request->get('relations_count')) {
+                $query = $query->setRelationsCount($request->get('relations_count'));
+            }
             return $query->create();
         } catch (\Throwable $e) {
             throw new ErrorException($e->getMessage(), $e->getCode());
@@ -241,7 +244,7 @@ trait InstantServiceTrait
      * - relations          optional    array
      * - mode               optional    default:get
      */
-    public function table(Collection $params)
+    public function table(Collection $params, ?callable $callback = null): LengthAwarePaginator
     {
         try {
             $paginate = $params->get('pagination_length', GeneralConfig::PAGINATE_PER_PAGE);
@@ -271,6 +274,10 @@ trait InstantServiceTrait
 
             // Data dari database yang diubah ke Array
             $userCollection = Helper::arrayOnly($query->items(), $params->get('column'));
+
+            if ($callback) {
+                $userCollection = $callback($userCollection);
+            }
 
             // Membuat ulang pagination
             $paginator = new LengthAwarePaginator($userCollection, $query->total(), $query->perPage(), $query->currentPage(), $pageOptions);
